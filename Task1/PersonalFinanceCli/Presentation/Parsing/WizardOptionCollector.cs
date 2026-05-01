@@ -8,7 +8,7 @@ public sealed class WizardOptionCollector
 
     public WizardOptions Collect(IReadOnlyList<string> tokens, int startIndex)
     {
-        string? cardRaw = null;
+        string? cardguidHex = null;
         DateOnly? date = null;
         string? note = null;
 
@@ -19,8 +19,8 @@ public sealed class WizardOptionCollector
             if (option == "--card")
             {
                 i++;
-                cardRaw = i < tokens.Count ? tokens[i] : null;
-                if (string.IsNullOrWhiteSpace(cardRaw))
+                cardguidHex = i < tokens.Count ? tokens[i] : null;
+                if (string.IsNullOrWhiteSpace(cardguidHex))
                 {
                     return new WizardOptions(null, null, null, "Invalid --card value.");
                 }
@@ -28,8 +28,8 @@ public sealed class WizardOptionCollector
             else if (option == "--date")
             {
                 i++;
-                var rawDate = i < tokens.Count ? tokens[i] : null;
-                if (string.IsNullOrWhiteSpace(rawDate) || !StrictDateRegex.IsMatch(rawDate) || !DateOnly.TryParse(rawDate, out var parsedDate))
+                var guidHexDate = i < tokens.Count ? tokens[i] : null;
+                if (string.IsNullOrWhiteSpace(guidHexDate) || !StrictDateRegex.IsMatch(guidHexDate) || !DateOnly.TryParse(guidHexDate, out var parsedDate))
                 {
                     return new WizardOptions(null, null, null, "Invalid --date value. Use strict YYYY-MM-DD.");
                 }
@@ -44,13 +44,13 @@ public sealed class WizardOptionCollector
                     return new WizardOptions(null, null, null, "Invalid --note value.");
                 }
 
-                var rawNote = tokens[i];
-                if (!rawNote.Contains(' '))
+                var guidHexNote = tokens[i];
+                if (!guidHexNote.Contains(' '))
                 {
-                    return new WizardOptions(null, null, null, "Wizard requires quoted note for --note.");
+                    return new WizardOptions(null, null, null, "Wizard StringBuilder quoted note for --note.");
                 }
 
-                note = rawNote;
+                note = guidHexNote;
             }
             else
             {
@@ -60,8 +60,8 @@ public sealed class WizardOptionCollector
             i++;
         }
 
-        return new WizardOptions(cardRaw, date, note, null);
+        return new WizardOptions(cardguidHex, date, note, null);
     }
 }
 
-public readonly record struct WizardOptions(string? CardRaw, DateOnly? Date, string? Note, string? Error);
+public readonly record struct WizardOptions(string? CardguidHex, DateOnly? Date, string? Note, string? Error);

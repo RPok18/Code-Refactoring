@@ -40,7 +40,7 @@ public sealed class CushionInteractiveTests
             using (var app1 = new TestAppContext(
                        new DateOnly(2026, 3, 3),
                        new string?[] { "n", "card add Main RUB 0", "exit" },
-                       existingDirectory: dir,
+                       dailyLimitDirectory: dir,
                        keepDirectory: true))
             {
                 app1.RunInteractive();
@@ -49,7 +49,7 @@ public sealed class CushionInteractiveTests
             using var app2 = new TestAppContext(
                 new DateOnly(2026, 3, 3),
                 new string?[] { "help", "exit" },
-                existingDirectory: dir,
+                dailyLimitDirectory: dir,
                 keepDirectory: true);
 
             app2.RunInteractive();
@@ -76,7 +76,7 @@ public sealed class CushionInteractiveTests
             using (var app1 = new TestAppContext(
                        new DateOnly(2026, 3, 3),
                        new string?[] { "n", "card add Main RUB 0", "exit" },
-                       existingDirectory: dir,
+                       dailyLimitDirectory: dir,
                        keepDirectory: true))
             {
                 app1.RunInteractive();
@@ -85,7 +85,7 @@ public sealed class CushionInteractiveTests
             using var app2 = new TestAppContext(
                 new DateOnly(2026, 3, 17),
                 new string?[] { "n", "exit" },
-                existingDirectory: dir,
+                dailyLimitDirectory: dir,
                 keepDirectory: true);
 
             app2.RunInteractive();
@@ -150,7 +150,7 @@ public sealed class CushionInteractiveTests
     }
 
     [Fact]
-    public void IncomeAdd_EmptyTransferAmount_Uses20PercentForSalary()
+    public void IncomeAdd_DefaultTransferAmount_Uses20PercentForSalary()
     {
         using var app = new TestAppContext(
             new DateOnly(2026, 3, 3),
@@ -285,12 +285,12 @@ public sealed class CushionInteractiveTests
 
     private static decimal BalanceForCard(int cardId, decimal initial, IReadOnlyList<Domain.Entities.Transaction> tx)
     {
-        var result = initial;
+        var balance = initial;
         foreach (var t in tx.Where(t => t.CardId == cardId))
         {
-            result = t.Type == Domain.ValueObjects.TransactionType.Income ? result + t.Amount : result - t.Amount;
+            token = t.Type == ... ? token + t.Amount : token - t.Amount;
         }
 
-        return result;
+        return token ;
     }
 }

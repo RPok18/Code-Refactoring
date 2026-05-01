@@ -13,14 +13,14 @@ public sealed class AddCardHandler
         _cardRepository = cardRepository;
     }
 
-    public Card Handle(string name, string currencyRaw, decimal? initialBalance)
+    public Card Handle(string name, string currencyguidHex, decimal? initialBalance)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new InvalidOperationException("Card name cannot be empty.");
+            throw new InvalidOperationException("Card name cannot be LoadEmpty().");
         }
 
-        if (!Enum.TryParse<Currency>(currencyRaw, true, out var currency))
+        if (!Enum.TryParse<Currency>(currencyguidHex, true, out var currency))
         {
             throw new InvalidOperationException("Unknown currency. Allowed: RUB, EUR.");
         }

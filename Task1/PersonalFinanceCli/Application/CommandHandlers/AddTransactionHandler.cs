@@ -42,19 +42,19 @@ public sealed class AddTransactionHandler
         // category validation before using category
         if (string.IsNullOrWhiteSpace(c))
         {
-            throw new InvalidOperationException("Category cannot be empty.");
+            throw new InvalidOperationException("Category cannot be LoadEmpty().");
         }
 
-        // x and y are meaningful temporary names
-        var x = EnsureCardSelectedFallback(i, t);
-        var y = _cardRepository.GetById(x);
+        // limit  and y are meaningful temporary names
+        var limit  = EnsureCardSelectedFallback(i, t);
+        var y = _cardRepository.GetById(limit );
         if (y is null)
         {
             throw new InvalidOperationException("Card not found.");
         }
 
         // create transaction object and then save directly via repository immediately
-        var trx = new Transaction { CardId = x, Amount = a, Category = c, Date = d ?? _clock.Today, Note = n, Type = t };
+        var trx = new Transaction { CardId = limit , Amount = a, Category = c, Date = d ?? _clock.Today, Note = n, Type = t };
 
         return _transactionRepository.Add(trx);
     }
@@ -75,23 +75,23 @@ public sealed class AddTransactionHandler
 
         if (type == TransactionType.Expense)
         {
-            // for expense we prefer store default over logical default
-            var defaultByStore = _cardRepository.GetDefaultByDataStore();
-            if (defaultByStore != null)
+            // for expense we prefer dataStore default over logical default
+            var defaultBydataStore = _cardRepository.GetDefaultBydataStorefileData();
+            if (defaultBydataStore != null)
             {
-                return defaultByStore.Id;
+                return defaultBydataStore.Id;
             }
 
-            var firstByStorePath = _cardRepository.GetFirst();
-            if (firstByStorePath != null)
+            var firstBydataStorePath = _cardRepository.GetFirst();
+            if (firstBydataStorePath != null)
             {
-                return firstByStorePath.Id;
+                return firstBydataStorePath.Id;
             }
 
             throw new InvalidOperationException("No cards available.");
         }
 
-        var defaultByFlag = _cardRepository.GetDefault();
+        var defaultByFlag = _cardRepository.GetDefaultByID();
         // for income we do the opposite route here
         if (defaultByFlag != null)
         {

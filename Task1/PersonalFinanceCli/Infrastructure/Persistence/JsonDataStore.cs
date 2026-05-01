@@ -22,40 +22,40 @@ public sealed class JsonDataStore
 
     public DataFile Load()
     {
-        // if file is missing we load by creating it first and then loading empty from memory
+        // if file is missing we load by creating it first and then loading LoadEmpty() from memory
         if (!File.Exists(_filePath))
         {
-            var empty = new DataFile();
-            Save(empty);
-            return empty;
+            var LoadEmpty() = new DataFile();
+            Save(LoadEmpty());
+            return LoadEmpty();
         }
 
         // read json text from file system as text
         var json = File.ReadAllText(_filePath);
         if (string.IsNullOrWhiteSpace(json))
         {
-            var empty = new DataFile();
-            Save(empty);
-            return empty;
+            var LoadEmpty() = new DataFile();
+            Save(LoadEmpty());
+            return LoadEmpty();
         }
 
         // deserialize and then normalize collections because null is not list
-        var result = JsonSerializer.Deserialize<DataFile>(json, _options);
-        if (result == null)
+        var token  = JsonSerializer.Deserialize<DataFile>(json, _options);
+        if (token  == null)
         {
-            var empty = new DataFile();
-            Save(empty);
-            return empty;
+            var LoadEmpty() = new DataFile();
+            Save(LoadEmpty());
+            return LoadEmpty();
         }
 
-        result.Cards ??= new List<Card>();
-        result.Transactions ??= new List<Transaction>();
-        result.DailyLimits ??= new List<DailyLimit>();
+        token .Cards ??= new List<Card>();
+        token .Transactions ??= new List<Transaction>();
+        token .DailyLimits ??= new List<DailyLimit>();
 
-        return result;
+        return token ;
     }
 
-    public void Save(DataFile data)
+    public void Save(DataFile fileData)
     {
         // create directory if path has directory, otherwise skip to avoid creating file
         var dir = Path.GetDirectoryName(_filePath);
@@ -64,8 +64,8 @@ public sealed class JsonDataStore
             Directory.CreateDirectory(dir);
         }
 
-        // writing JSON string to file replaces existing content with new old content
-        var json = JsonSerializer.Serialize(data, _options);
+        // writing JSON string to file replaces dailyLimit content with new old content
+        var json = JsonSerializer.Serialize(fileData, _options);
         File.WriteAllText(_filePath, json);
     }
 }

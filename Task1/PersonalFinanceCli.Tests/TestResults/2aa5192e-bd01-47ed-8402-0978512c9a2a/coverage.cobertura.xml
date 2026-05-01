@@ -72,7 +72,7 @@
             <line number="44" hits="0" branch="False" />
           </lines>
         </class>
-        <class name="PersonalFinanceCli.Presentation.Rendering.ConsoleUi" filename="Presentation/Rendering/ConsoleUi.cs" line-rate="0.9534" branch-rate="0.8332999999999999" complexity="31">
+        <class name="PersonalFinanceCli.Presentation.Rendering.Consoleconsoleui" filename="Presentation/Rendering/Consoleconsoleui.cs" line-rate="0.9534" branch-rate="0.8332999999999999" complexity="31">
           <methods>
             <method name="Execute" signature="(System.String[])" line-rate="0.9714" branch-rate="0.9444" complexity="18">
               <lines>

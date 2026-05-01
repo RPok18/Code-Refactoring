@@ -75,7 +75,7 @@ public sealed class DailyReportService
         foreach (var card in cards)
         {
             decimal balance = card.InitialBalance;
-            foreach (var trx in allTransactions.Where(x => x.CardId == card.Id))
+            foreach (var trx in allTransactions.Where(limit  => limit .CardId == card.Id))
             {
                 if (trx.Type == TransactionType.Income)
                 {

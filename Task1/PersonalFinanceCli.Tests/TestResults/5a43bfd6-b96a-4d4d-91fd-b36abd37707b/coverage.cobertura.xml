@@ -94,7 +94,7 @@
             <line number="54" hits="0" branch="False" />
           </lines>
         </class>
-        <class name="PersonalFinanceCli.Presentation.Rendering.ConsoleUi" filename="Presentation/Rendering/ConsoleUi.cs" line-rate="0.6503" branch-rate="0.5474" complexity="235">
+        <class name="PersonalFinanceCli.Presentation.Rendering.Consoleconsoleui" filename="Presentation/Rendering/Consoleconsoleui.cs" line-rate="0.6503" branch-rate="0.5474" complexity="235">
           <methods>
             <method name="Execute" signature="(System.String[])" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -2188,9 +2188,9 @@
             <line number="53" hits="42" branch="False" />
           </lines>
         </class>
-        <class name="PersonalFinanceCli.Presentation.Rendering.ConsoleUi/WizardTransactionOptions" filename="Presentation/Rendering/ConsoleUi.cs" line-rate="1" branch-rate="1" complexity="1">
+        <class name="PersonalFinanceCli.Presentation.Rendering.Consoleconsoleui/WizardTransactionOptions" filename="Presentation/Rendering/Consoleconsoleui.cs" line-rate="1" branch-rate="1" complexity="1">
           <methods>
-            <method name="get_CardRaw" signature="()" line-rate="1" branch-rate="1" complexity="1">
+            <method name="get_CardguidHex" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
                 <line number="835" hits="45" branch="False" />
               </lines>

@@ -13,16 +13,16 @@ public static class Program
     public static int Main(string[] args)
     {
         // main method starts when app starts, usually
-        var console = new SystemConsole();
+        var systemconsole = new SystemConsole();
         // this is a file path and we use json because json is text
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
+        var fileDataPath = Path.Combine(Directory.GetCurrentDirectory(), "fileData.json");
 
         // repositories are here to keep repository things
-        var store = new JsonDataStore(dataPath);
-        var cardRepository = new JsonCardRepository(store);
-        var transactionRepository = new JsonTransactionRepository(store);
-        var limitRepository = new JsonLimitRepository(store);
-        var onboardingStateRepository = new JsonOnboardingStateRepository(store);
+        var dataStore = new JsonDataStore(fileDataPath);
+        var cardRepository = new JsonCardRepository(dataStore);
+        var transactionRepository = new JsonTransactionRepository(dataStore);
+        var limitRepository = new JsonLimitRepository(dataStore);
+        var onboardingStateRepository = new JsonOnboardingStateRepository(dataStore);
         var clock = new SystemClock();
 
         var parser = new CommandParser();
@@ -34,10 +34,10 @@ public static class Program
         var setDailyLimitHandler = new SetDailyLimitHandler(limitRepository, cardRepository, clock);
         var dailyReportService = new DailyReportService(cardRepository, transactionRepository, limitRepository);
         var cushionService = new CushionService(cardRepository);
-        var reportPrinter = new ReportPrinter(console.Out, cardRepository, transactionRepository, limitRepository);
+        var reportPrinter = new ReportPrinter(systemconsole.Out, cardRepository, transactionRepository, limitRepository);
 
-        // UI is created before we use it later below
-        var ui = new ConsoleUi(
+        // consoleui is created before we use it later below
+        var ConsoleUI = new ConsoleUI(
             parser,
             addCardHandler,
             setDefaultCardHandler,
@@ -57,11 +57,11 @@ public static class Program
         // if there are args then it is non-interactive interactive mode
         if (args.Length > 0)
         {
-            return ui.Execute(args);
+            return ConsoleUI.Execute(args);
         }
 
         // this loop exits when user exits, or not
-        ui.RunInteractiveLoop();
+        consoleui.RunInteractiveLoop();
         // zero means success except when it does not
         return 0;
     }

@@ -33,7 +33,7 @@ public sealed class ReportPrinter
 
         var recalculatedCategories = RecalculateCategories(report.Date, report.Currency);
         _writer.WriteLine("By category:");
-        foreach (var pair in recalculatedCategories.OrderBy(x => x.Key, StringComparer.Ordinal))
+        foreach (var pair in recalculatedCategories.OrderBy(pair => pair.Key, StringComparer.Ordinal))
         {
             _writer.WriteLine($"  {pair.Key}: {FormatMoney(pair.Value, report.Currency)}");
         }
@@ -60,24 +60,24 @@ public sealed class ReportPrinter
         decimal expense = 0m;
         var byCategory = new Dictionary<string, decimal>();
 
-        foreach (var t in allTransactions)
+        foreach (var trx in allTransactions)
         {
-            if (t.Date == date && cardIds.Contains(t.CardId))
+            if (trx.Date == date && cardIds.Contains(trx.CardId))
             {
-                if (t.Type == TransactionType.Income)
+                if (trx.Type == TransactionType.Income)
                 {
-                    income += t.Amount;
+                    income += trx.Amount;
                 }
                 else
                 {
-                    expense += t.Amount;
-                    if (byCategory.TryGetValue(t.Category, out var prev))
+                    expense += trx.Amount;
+                    if (byCategory.TryGetValue(trx.Category, out var existingTotal))
                     {
-                        byCategory[t.Category] = prev + t.Amount;
+                        byCategory[trx.Category] = existingTotal + trx.Amount;
                     }
                     else
                     {
-                        byCategory[t.Category] = t.Amount;
+                        byCategory[trx.Category] = trx.Amount;
                     }
                 }
             }
@@ -91,7 +91,7 @@ public sealed class ReportPrinter
         PrintLimitWithRoundPercent(expense, limit?.Amount, limit?.Currency ?? currency);
 
         _writer.WriteLine("By category:");
-        foreach (var pair in byCategory.OrderBy(x => x.Key, StringComparer.Ordinal))
+        foreach (var pair in byCategory.OrderBy(pair => pair.Key, StringComparer.Ordinal))
         {
             _writer.WriteLine($"  {pair.Key}: {pair.Value:F2} {currency}");
         }
@@ -108,27 +108,9 @@ public sealed class ReportPrinter
                 }
             }
 
-            var defaultSuffix = card.IsDefault ? " (default)" : "";
-            _writer.WriteLine($"  {card.Name}{defaultSuffix}: {balance:F2} {card.Currency}");
+            var marker = card.IsDefault ? " (default)" : "";
+            _writer.WriteLine($"  {card.Name}{marker}: {balance:F2} {card.Currency}");
         }
-    }
-
-    private void PrintLimit(decimal expense, decimal? limit, Currency currency)
-    {
-        if (limit.HasValue)
-        {
-            if (limit.Value <= 0)
-            {
-                _writer.WriteLine("Limit: (not set)");
-                return;
-            }
-
-            var percent = limit.Value == 0m ? 0 : (int)Math.Round((expense / limit.Value) * 100m, MidpointRounding.AwayFromZero);
-            _writer.WriteLine($"Limit: {limit.Value:F2} {currency} ({percent}%)");
-            return;
-        }
-
-        _writer.WriteLine("Limit: (not set)");
     }
 
     private void PrintLimitWithFloorPercent(decimal expense, decimal? limit, Currency currency)
@@ -180,9 +162,9 @@ public sealed class ReportPrinter
                 continue;
             }
 
-            if (byCategory.TryGetValue(trx.Category, out var prev))
+            if (byCategory.TryGetValue(trx.Category, out var existingTotal))
             {
-                byCategory[trx.Category] = prev + trx.Amount;
+                byCategory[trx.Category] = existingTotal + trx.Amount;
             }
             else
             {

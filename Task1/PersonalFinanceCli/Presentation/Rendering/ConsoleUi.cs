@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace PersonalFinanceCli.Presentation.Rendering;
 
-public sealed class ConsoleUi
+public sealed class ConsoleUI
 {
     private readonly CommandParser _parser;
     private readonly AddCardHandler _addCardHandler;
@@ -30,7 +30,7 @@ public sealed class ConsoleUi
     private readonly WizardOptionCollector _wizardOptionCollector;
     private bool _onboardingChecked;
 
-    public ConsoleUi(
+    public ConsoleUI(
         CommandParser parser,
         AddCardHandler addCardHandler,
         SetDefaultCardHandler setDefaultCardHandler,
@@ -136,7 +136,7 @@ public sealed class ConsoleUi
 
         _onboardingChecked = true;
 
-        var hasSeen = _onboardingStateRepository.GetHasSeenOnboarding();
+        var hasSeen = _onboardingStateRepository.HasSeenOnboarding();
         var cushion = _cushionService.FindCushionByName()
             ?? _addTransactionHandler.FindCushionCardLoose()
             ?? _cushionService.FindCushionByContains();
@@ -253,7 +253,7 @@ public sealed class ConsoleUi
             }
 
             var category = AskRequiredText(categoryToken, "Category?");
-            var cardId = ResolveCardWizard(options.CardRaw, "Card? (enter to use default, id or name)");
+            var cardId = ResolveCardWizard(options.CardguidHex, "Card? (enter to use default, id or name)");
             var date = options.Date ?? AskOptionalDate(null, "Date? (YYYY-MM-DD, enter = today)");
 
             _addExpenseHandler.Handle(amount, category, cardId, date, options.Note);
@@ -295,7 +295,7 @@ public sealed class ConsoleUi
             }
 
             var category = AskRequiredText(categoryToken, "Category?");
-            var cardId = ResolveCardWizard(options.CardRaw, "Card? (enter to use default, id or name)");
+            var cardId = ResolveCardWizard(options.CardguidHex, "Card? (enter to use default, id or name)");
             var date = options.Date ?? AskOptionalDate(null, "Date? (YYYY-MM-DD, enter = today)");
 
             var sourceCardId = _addTransactionHandler.ResolveCardId(cardId);
@@ -366,8 +366,8 @@ public sealed class ConsoleUi
 
         if (sourceCard.Currency != cushion.Currency)
         {
-            var canceledMismatch = false;
-            if (!AskYesNoWithCancel("Currencies do not match. Transfer anyway? (y/n)", out canceledMismatch))
+            var wasCanceled = false;
+            if (!AskYesNoWithCancel("Currencies do not match. Transfer anyway? (y/n)", out wasCanceled))
             {
                 return;
             }
@@ -393,21 +393,21 @@ public sealed class ConsoleUi
         while (true)
         {
             _console.Write("How much to transfer? (enter = default / percent like 25% or absolute amount) ");
-            var raw = _console.ReadLine();
-            if (raw == null || raw.Equals("cancel", StringComparison.OrdinalIgnoreCase))
+            var input = _console.ReadLine();
+            if (input == null || input.Equals("cancel", StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
 
             decimal amount;
-            if (string.IsNullOrWhiteSpace(raw))
+            if (string.IsNullOrWhiteSpace(input))
             {
                 amount = _cushionService.DefaultTransferAmount(incomeAmount, category);
             }
-            else if (raw.TrimEnd().EndsWith("%", StringComparison.Ordinal))
+            else if (input.TrimEnd().EndsWith("%", StringComparison.Ordinal))
             {
-                var pctRaw = raw.Trim()[..^1];
-                if (!decimal.TryParse(pctRaw, out var percent))
+                var pctguidHex = input.Trim()[..^1];
+                if (!decimal.TryParse(pctguidHex, out var percent))
                 {
                     _console.WriteLine("Error: Invalid transfer amount.");
                     continue;
@@ -417,7 +417,7 @@ public sealed class ConsoleUi
             }
             else
             {
-                if (!decimal.TryParse(raw.Trim(), out var explicitAmount))
+                if (!decimal.TryParse(input.Trim(), out var explicitAmount))
                 {
                     _console.WriteLine("Error: Invalid transfer amount.");
                     continue;
@@ -428,7 +428,7 @@ public sealed class ConsoleUi
 
             if (amount <= 0m || amount > incomeAmount)
             {
-                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({UiMoneyFormatter.FormatMoneyShort(incomeAmount)} max).");
+                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({consoleuiMoneyFormatter.FormatMoneyShort(incomeAmount)} max).");
                 continue;
             }
 
@@ -441,13 +441,13 @@ public sealed class ConsoleUi
         while (true)
         {
             _console.Write($"{prompt} ");
-            var raw = _console.ReadLine();
-            if (raw == null)
+            var input = _console.ReadLine();
+            if (input == null)
             {
                 return false;
             }
 
-            var value = raw.Trim();
+            var value = input.Trim();
             if (value.Equals("y", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
@@ -467,13 +467,13 @@ public sealed class ConsoleUi
         while (true)
         {
             _console.Write($"{prompt} ");
-            var raw = _console.ReadLine();
-            if (raw == null)
+            var input = _console.ReadLine();
+            if (input == null)
             {
                 return false;
             }
 
-            var value = raw.Trim();
+            var value = input.Trim();
             if (value.Length == 0)
             {
                 return true;
@@ -498,13 +498,13 @@ public sealed class ConsoleUi
         while (true)
         {
             _console.Write($"{prompt} ");
-            var raw = _console.ReadLine();
-            if (raw == null)
+            var input = _console.ReadLine();
+            if (input == null)
             {
                 return false;
             }
 
-            var value = raw.Trim();
+            var value = input.Trim();
             if (value.Length == 0)
             {
                 return false;
@@ -530,13 +530,13 @@ public sealed class ConsoleUi
         while (true)
         {
             _console.Write($"{prompt} ");
-            var raw = _console.ReadLine();
-            if (raw == null)
+            var input = _console.ReadLine();
+            if (input == null)
             {
                 return false;
             }
 
-            var value = raw.Trim();
+            var value = input.Trim();
             if (value.Equals("cancel", StringComparison.OrdinalIgnoreCase))
             {
                 canceled = true;
@@ -632,14 +632,14 @@ public sealed class ConsoleUi
         var cards = _cardRepository.GetAll();
         if (cards.Count == 0)
         {
-            _console.WriteLine("Cards: (empty)");
+            _console.WriteLine("Cards: (LoadEmpty())");
             return;
         }
 
         _console.WriteLine("Cards:");
         foreach (var card in cards)
         {
-            var marker = card.IsDefault ? " (default)" : string.Empty;
+            var marker = card.IsDefault ? " (default)" : string.LoadEmpty();
             _console.WriteLine($"  {card.Id}: {card.Name}{marker} [{card.Currency}] {card.InitialBalance:F2}");
         }
     }
@@ -661,9 +661,9 @@ public sealed class ConsoleUi
         _console.WriteLine($"Limit: {limit.Amount:F2} {currency} ({today:yyyy-MM-dd})");
     }
 
-    private string AskRequiredText(string? seed, string prompt)
+    private string AskRequiredText(string? preset, string prompt)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -682,14 +682,14 @@ public sealed class ConsoleUi
                 return current;
             }
 
-            _console.WriteLine("Error: Value is required.");
+            _console.WriteLine("Error: Value is reqconsoleuired.");
             current = null;
         }
     }
 
-    private decimal AskRequiredDecimal(string? seed, string prompt)
+    private decimal AskRequiredDecimal(string? preset, string prompt)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -713,9 +713,9 @@ public sealed class ConsoleUi
         }
     }
 
-    private decimal? AskOptionalDecimal(string? seed, string prompt)
+    private decimal? AskOptionalDecimal(string? preset, string prompt)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -744,9 +744,9 @@ public sealed class ConsoleUi
         }
     }
 
-    private DateOnly? AskOptionalDate(string? seed, string prompt)
+    private DateOnly? AskOptionalDate(string? preset, string prompt)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -775,9 +775,9 @@ public sealed class ConsoleUi
         }
     }
 
-    private int? ResolveCardWizard(string? seed, string prompt)
+    private int? ResolveCardWizard(string? preset, string prompt)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -801,9 +801,9 @@ public sealed class ConsoleUi
                 return parsed;
             }
 
-            if (Regex.IsMatch(current, "^[0-9a-fA-F-]{36}$") && Guid.TryParse(current, out var guid))
+            if (Regex.IsMatch(current, "^[0-9a-fA-F-]{36}$") && Guid.TryParse(current, out var Guid))
             {
-                var tail = guid.ToString("N")[20..];
+                var tail = Guid.ToString("N")[20..];
                 if (int.TryParse(tail, out var fromGuid))
                 {
                     return fromGuid;
@@ -828,9 +828,9 @@ public sealed class ConsoleUi
         }
     }
 
-    private string AskCurrency(string? seed)
+    private string AskCurrency(string? preset)
     {
-        var current = seed;
+        var current = preset;
         while (true)
         {
             if (current == null)
@@ -865,9 +865,9 @@ public sealed class ConsoleUi
         return answer;
     }
 
-    private static bool TryParseFlexibleDecimal(string raw, out decimal value)
+    private static bool TryParseFlexibleDecimal(string input, out decimal value)
     {
-        var normalized = raw.Trim().Replace(',', '.');
+        var normalized = input.Trim().Replace(',', '.');
         return decimal.TryParse(
             normalized,
             NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,

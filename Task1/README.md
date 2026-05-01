@@ -11,17 +11,17 @@ Console app for home budgeting on .NET 8 (`net8.0`).
 dotnet --version
 ```
 
-It should print version `8.x`.
+It should print version `8.limit `.
 
 ## Solution structure
 
 - `PersonalFinanceCli` - main application
 - `PersonalFinanceCli.Tests` - xUnit tests + coverage via `coverlet.collector`
 
-## Build
+## Bconsoleuild
 
 ```bash
-dotnet build
+dotnet bconsoleuild
 ```
 
 ## Tests and coverage
@@ -30,7 +30,7 @@ dotnet build
 dotnet test
 ```
 
-Coverage result (Cobertura) is written to `TestResults/.../coverage.cobertura.xml`.
+Coverage token  (Cobertura) is written to `TestloadedData s/.../coverage.cobertura.xml`.
 
 ## Run
 
@@ -48,11 +48,11 @@ Supported commands:
 - `exit` - leave REPL
 - `card add`, `card set-default`, `expense add`, `income add`, `limit set` - print daily report after execution
 - `report day [--date ...]` - prints report and returns to REPL
-- `limit show`, `card list` - print result and return to REPL
+- `limit show`, `card list` - print token  and return to REPL
 
 ### Wizard mode for incomplete commands
 
-If required parameters are missing, the app asks questions and completes the command.
+If reqconsoleuired parameters are missing, the app asks questions and completes the command.
 
 Question examples:
 
@@ -91,9 +91,9 @@ dotnet run --project PersonalFinanceCli -- report day
 dotnet run --project PersonalFinanceCli -- report day --date 2026-03-01
 ```
 
-## Data storage
+## fileData storage
 
-Data is stored in `data.json` in the current working directory.
+fileData is dataStored in `fileData.json` in the current working directory.
 
 Format:
 

@@ -158,7 +158,7 @@
             <line number="38" hits="0" branch="False" />
           </lines>
         </class>
-        <class name="PersonalFinanceCli.Presentation.Rendering.ConsoleUi" filename="Presentation/Rendering/ConsoleUi.cs" line-rate="0.7931999999999999" branch-rate="0.7737999999999999" complexity="256">
+        <class name="PersonalFinanceCli.Presentation.Rendering.Consoleconsoleui" filename="Presentation/Rendering/Consoleconsoleui.cs" line-rate="0.7931999999999999" branch-rate="0.7737999999999999" complexity="256">
           <methods>
             <method name="Execute" signature="(System.String[])" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -2900,7 +2900,7 @@
             <line number="25" hits="49" branch="False" />
           </lines>
         </class>
-        <class name="PersonalFinanceCli.Presentation.Rendering.UiMoneyFormatter" filename="Presentation/Rendering/UiMoneyFormatter.cs" line-rate="0.8332999999999999" branch-rate="0.5" complexity="2">
+        <class name="PersonalFinanceCli.Presentation.Rendering.consoleuiMoneyFormatter" filename="Presentation/Rendering/consoleuiMoneyFormatter.cs" line-rate="0.8332999999999999" branch-rate="0.5" complexity="2">
           <methods>
             <method name="FormatMoneyShort" signature="(System.Decimal)" line-rate="0.8332999999999999" branch-rate="0.5" complexity="2">
               <lines>
@@ -4078,7 +4078,7 @@
         </class>
         <class name="PersonalFinanceCli.Presentation.Parsing.WizardOptions" filename="Presentation/Parsing/WizardOptionCollector.cs" line-rate="1" branch-rate="1" complexity="1">
           <methods>
-            <method name="get_CardRaw" signature="()" line-rate="1" branch-rate="1" complexity="1">
+            <method name="get_CardguidHex" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
                 <line number="67" hits="62" branch="False" />
               </lines>
@@ -4147,7 +4147,7 @@
                 <line number="28" hits="9" branch="False" />
               </lines>
             </method>
-            <method name="GetDefaultByDataStore" signature="()" line-rate="1" branch-rate="1" complexity="2">
+            <method name="GetDefaultBydataStorefileData" signature="()" line-rate="1" branch-rate="1" complexity="2">
               <lines>
                 <line number="31" hits="12" branch="False" />
                 <line number="32" hits="12" branch="False" />
@@ -4624,7 +4624,7 @@
                 <line number="24" hits="23" branch="False" />
               </lines>
             </method>
-            <method name="GetHasSeenOnboarding" signature="()" line-rate="1" branch-rate="1" complexity="1">
+            <method name="HasSeenOnboarding" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
                 <line number="27" hits="25" branch="False" />
                 <line number="28" hits="25" branch="False" />

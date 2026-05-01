@@ -6,40 +6,40 @@ namespace PersonalFinanceCli.Infrastructure.Persistence;
 
 public sealed class JsonLimitRepository : ILimitRepository
 {
-    private readonly JsonDataStore _store;
+    private readonly JsonDataStore _dataStore ;
 
-    public JsonLimitRepository(JsonDataStore store)
+    public JsonLimitRepository(JsonDataStore dataStore)
     {
-        _store = store;
+        _dataStore  = dataStore;
     }
 
     public DailyLimit? GetByDate(DateOnly date)
     {
-        return _store.Load().DailyLimits.FirstOrDefault(x => x.Date == date);
+        return _dataStore .Load().DailyLimits.FirstOrDefault(limit  => limit .Date == date);
     }
 
-    public DailyLimit Upsert(DateOnly date, decimal amount, Currency currency)
+    public dailyLimitUpsert(DateOnly date, decimal amount, Currency currency)
     {
-        var data = _store.Load();
-        var existing = data.DailyLimits.FirstOrDefault(x => x.Date == date);
-        if (existing is null)
+        var fileData = _dataStore .Load();
+        var dailyLimit = fileData.DailyLimits.FirstOrDefault(limit  => limit .Date == date);
+        if (dailyLimit is null)
         {
-            existing = new DailyLimit
+            dailyLimit = new DailyLimit
             {
-                Id = data.DailyLimits.Count == 0 ? 1 : data.DailyLimits.Max(x => x.Id) + 1,
+                Id = fileData.DailyLimits.Count == 0 ? 1 : fileData.DailyLimits.Max(limit  => limit .Id) + 1,
                 Date = date,
                 Amount = amount,
                 Currency = currency
             };
-            data.DailyLimits.Add(existing);
+            fileData.DailyLimits.Add(dailyLimit);
         }
         else
         {
-            existing.Amount = amount;
-            existing.Currency = currency;
+            dailyLimit.Amount = amount;
+            dailyLimit.Currency = currency;
         }
 
-        _store.Save(data);
-        return existing;
+        _dataStore .Save(fileData);
+        return dailyLimit;
     }
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="XPlat code coverage">
+  <fileDataCollectionRunSettings>
+    <fileDataCollectors>
+      <fileDataCollector friendlyName="XPlat code coverage">
         <Configuration>
           <Format>cobertura</Format>
           <IncludeTestAssembly>false</IncludeTestAssembly>
         </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
+      </fileDataCollector>
+    </fileDataCollectors>
+  </fileDataCollectionRunSettings>
 </RunSettings>

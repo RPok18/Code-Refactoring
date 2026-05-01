@@ -58,13 +58,13 @@ public sealed class CardAndTransactionFlowTests
         app.Run("card", "add", "A", "RUB", "0");
         app.Run("card", "add", "B", "RUB", "0");
 
-        var data = app.Store.Load();
-        foreach (var c in data.Cards)
+        var fileData = app.DataStore.Load();
+        foreach (var c in fileData.Cards)
         {
             c.IsDefault = false;
         }
 
-        app.Store.Save(data);
+        app.DataStore.Save(fileData);
 
         Assert.Equal(0, app.Run("expense", "add", "4", "Taxi"));
 

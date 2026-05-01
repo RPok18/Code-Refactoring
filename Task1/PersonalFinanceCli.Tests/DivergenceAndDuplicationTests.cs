@@ -9,11 +9,11 @@ public sealed class DivergenceAndDuplicationTests
         app.Run("card", "add", "A", "RUB", "0");
         app.Run("card", "add", "B", "RUB", "0");
 
-        var data = app.Store.Load();
-        data.Cards.Single(c => c.Id == 1).IsDefault = true;
-        data.Cards.Single(c => c.Id == 2).IsDefault = false;
-        data.DefaultCardId = CardIdToGuid(2);
-        app.Store.Save(data);
+        var fileData = app.DataStore.Load();
+        fileData.Cards.Single(c => c.Id == 1).IsDefault = true;
+        fileData.Cards.Single(c => c.Id == 2).IsDefault = false;
+        fileData.DefaultCardId = CardIdToGuid(2);
+        app.DataStore.Save(fileData);
 
         Assert.Equal(0, app.Run("expense", "add", "5", "Food"));
         Assert.Equal(0, app.Run("income", "add", "7", "Salary"));
@@ -42,10 +42,10 @@ public sealed class DivergenceAndDuplicationTests
     public void Onboarding_HasSeenTrue_AndNoCards_DoesNotAsk()
     {
         using var app = new TestAppContext(new DateOnly(2026, 3, 3), new[] { "exit" });
-        var data = app.Store.Load();
-        data.HasSeenOnboarding = true;
-        data.Cards.Clear();
-        app.Store.Save(data);
+        var fileData = app.DataStore.Load();
+        fileData.HasSeenOnboarding = true;
+        fileData.Cards.Clear();
+        app.DataStore.Save(fileData);
 
         app.RunInteractive();
         Assert.DoesNotContain("Create 'Financial cushion' account? (y/n)", app.Output);
@@ -61,16 +61,16 @@ public sealed class DivergenceAndDuplicationTests
         Assert.Equal("plain", parsed.Note);
 
         var collector = new PersonalFinanceCli.Presentation.Parsing.WizardOptionCollector();
-        var failDate = collector.Collect(new[] { "--date", "2026-3-3" }, 0);
-        Assert.Equal("Invalid --date value. Use strict YYYY-MM-DD.", failDate.Error);
+        var dateResult = collector.Collect(new[] { "--date", "2026-3-3" }, 0);
+        Assert.Equal("Invalid --date value. Use strict YYYY-MM-DD.", dateResult.Error);
 
-        var failNote = collector.Collect(new[] { "--note", "plain" }, 0);
+        var noteResult = collector.Collect(new[] { "--note", "plain" }, 0);
         Assert.Equal("Wizard requires quoted note for --note.", failNote.Error);
     }
 
     private static Guid CardIdToGuid(int cardId)
     {
-        var raw = cardId.ToString("D12");
-        return Guid.Parse($"00000000-0000-0000-0000-{raw}");
+        var input = cardId.ToString("D12");
+        return Guid.Parse($"00000000-0000-0000-0000-{input}");
     }
 }

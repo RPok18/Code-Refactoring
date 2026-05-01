@@ -1,6 +1,6 @@
 namespace PersonalFinanceCli.Presentation.Rendering;
 
-public static class UiMoneyFormatter
+public static class consoleuiMoneyFormatter
 {
     public static string FormatMoneyShort(decimal amount)
     {

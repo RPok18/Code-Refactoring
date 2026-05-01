@@ -105,21 +105,21 @@ public sealed class LimitAndReportTests
     }
 
     [Fact]
-    public void Report_ShowsNotSet_WhenStoredLimitIsZero()
+    public void Report_ShowsNotSet_WhenDataStoredLimitIsZero()
     {
         using var app = new TestAppContext(new DateOnly(2026, 3, 3));
 
         app.Run("card", "add", "A", "RUB");
 
-        var data = app.Store.Load();
-        data.DailyLimits.Add(new PersonalFinanceCli.Domain.Entities.DailyLimit
+        var fileData = app.DataStore.Load();
+        fileData.DailyLimits.Add(new PersonalFinanceCli.Domain.Entities.DailyLimit
         {
             Id = 1,
             Date = new DateOnly(2026, 3, 3),
             Amount = 0,
             Currency = PersonalFinanceCli.Domain.ValueObjects.Currency.RUB
         });
-        app.Store.Save(data);
+        app.DataStore.Save(fileData);
 
         Assert.Equal(0, app.Run("report", "day"));
         Assert.Contains("Limit: (not set)", app.Output);

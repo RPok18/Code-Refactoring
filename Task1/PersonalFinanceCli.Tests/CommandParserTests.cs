@@ -40,13 +40,13 @@ public sealed class CommandParserTests
     }
 
     [Fact]
-    public void Parse_ExpenseEmptyCategoryAfterTrim_ThrowsInParser()
+    public void Parse_Expense_CategoryEmptyAfterTrim_Throws()
     {
         var parser = new CommandParser();
 
         var ex = Assert.Throws<InvalidOperationException>(() => parser.Parse("expense add 2 \"   \""));
 
-        Assert.Equal("Category cannot be empty.", ex.Message);
+        Assert.Equal("Category cannot be LoadEmpty().", ex.Message);
     }
 
     [Fact]

@@ -72,7 +72,7 @@ public sealed class InteractiveConsoleUiTests
                 "abc",
                 "10",
                 "Food",
-                "x",
+                "limit ",
                 "1",
                 "wrong",
                 "2026-03-03",

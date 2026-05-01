@@ -1,37 +1,30 @@
 using PersonalFinanceCli.Application.Repositories;
-
 namespace PersonalFinanceCli.Infrastructure.Persistence;
-
 public sealed class JsonOnboardingStateRepository : IOnboardingStateRepository
 {
-    private readonly JsonDataStore _store;
-
-    public JsonOnboardingStateRepository(JsonDataStore store)
+    private readonly JsonDataStore _dataStore;
+    public JsonOnboardingStateRepository(JsonDataStore dataStore)
     {
-        _store = store;
+        _dataStore = dataStore;
     }
-
     public DateOnly? GetLastCushionDeclinedDate()
     {
-        return _store.Load().LastCushionDeclinedDate;
+        return _dataStore.Load().LastCushionDeclinedDate;
     }
-
     public void SetLastCushionDeclinedDate(DateOnly? date)
     {
-        var data = _store.Load();
-        data.LastCushionDeclinedDate = date;
-        _store.Save(data);
+        var fileData = _dataStore.Load();
+        fileData.LastCushionDeclinedDate = date;
+        _dataStore.Save(fileData);
     }
-
-    public bool GetHasSeenOnboarding()
+    public bool HasSeenOnboarding()
     {
-        return _store.Load().HasSeenOnboarding;
+        return _dataStore.Load().HasSeenOnboarding;
     }
-
-    public void SetHasSeenOnboarding(bool value)
+    public void SetHasSeenOnboarding(bool hasSeenOnboarding)
     {
-        var data = _store.Load();
-        data.HasSeenOnboarding = value;
-        _store.Save(data);
+        var fileData = _dataStore.Load();
+        fileData.HasSeenOnboarding = hasSeenOnboarding;
+        _dataStore.Save(fileData);
     }
 }

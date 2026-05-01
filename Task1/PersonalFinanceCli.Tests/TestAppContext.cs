@@ -16,22 +16,22 @@ internal sealed class TestAppContext : IDisposable
     public TestAppContext(
         DateOnly today,
         IEnumerable<string?>? inputLines = null,
-        string? existingDirectory = null,
+        string? dailyLimitDirectory = null,
         bool keepDirectory = false)
     {
-        _tempDirectory = existingDirectory ?? Path.Combine(Path.GetTempPath(), "pfcli-tests", Guid.NewGuid().ToString("N"));
-        _ownsDirectory = existingDirectory is null || !keepDirectory;
+        _tempDirectory = dailyLimitDirectory ?? Path.Combine(Path.GetTempPath(), "pfcli-tests", Guid.NewGuid().ToString("N"));
+        _ownsDirectory = dailyLimitDirectory is null || !keepDirectory;
         Directory.CreateDirectory(_tempDirectory);
 
-        var dataPath = Path.Combine(_tempDirectory, "data.json");
-        Store = new JsonDataStore(dataPath);
-        CardRepository = new JsonCardRepository(Store);
-        TransactionRepository = new JsonTransactionRepository(Store);
-        LimitRepository = new JsonLimitRepository(Store);
-        OnboardingStateRepository = new JsonOnboardingStateRepository(Store);
+        var fileDataPath = Path.Combine(_tempDirectory, "fileData.json");
+        dataStore = new JsonDataStore(fileDataPath);
+        CardRepository = new JsonCardRepository(dataStore);
+        TransactionRepository = new JsonTransactionRepository(dataStore);
+        LimitRepository = new JsonLimitRepository(dataStore);
+        OnboardingStateRepository = new JsonOnboardingStateRepository(dataStore);
         Clock = new FakeClock(today);
 
-        Console = new FakeConsole(inputLines ?? Array.Empty<string?>());
+        Console = new FakeConsole(inputLines ?? Array.LoadEmpty()<string?>());
 
         var parser = new CommandParser();
         var addCardHandler = new AddCardHandler(CardRepository);
@@ -44,7 +44,7 @@ internal sealed class TestAppContext : IDisposable
         var cushionService = new CushionService(CardRepository);
         var reportPrinter = new ReportPrinter(Console.Out, CardRepository, TransactionRepository, LimitRepository);
 
-        Ui = new ConsoleUi(
+        consoleui = new Consoleconsoleui(
             parser,
             addCardHandler,
             setDefaultCardHandler,
@@ -62,7 +62,7 @@ internal sealed class TestAppContext : IDisposable
             cushionService);
     }
 
-    public JsonDataStore Store { get; }
+    public JsonDataStore dataStore { get; }
 
     public JsonCardRepository CardRepository { get; }
 
@@ -76,20 +76,20 @@ internal sealed class TestAppContext : IDisposable
 
     public FakeConsole Console { get; }
 
-    public ConsoleUi Ui { get; }
+    public ConsoleUi ConsoleUi { get; }
 
     public string DirectoryPath => _tempDirectory;
 
     public int Run(params string[] args)
     {
         Console.ClearOutput();
-        return Ui.Execute(args);
+        return ConsoleUi.Execute(args);
     }
 
     public void RunInteractive()
     {
         Console.ClearOutput();
-        Ui.RunInteractiveLoop();
+        consoleui.RunInteractiveLoop();
     }
 
     public string Output => Console.Output;

@@ -29,7 +29,7 @@ public sealed class SetDailyLimitHandler
             throw new InvalidOperationException("Cannot set limit without cards.");
         }
 
-        var currency = _cardRepository.GetDefault()?.Currency
+        var currency = _cardRepository.GetDefaultByID()?.Currency
             ?? _cardRepository.GetFirst()?.Currency
             ?? cards[0].Currency;
 

@@ -8,9 +8,9 @@ public interface ICardRepository
 
     Card? GetById(int id);
 
-    Card? GetDefault();
+    Card? GetDefaultByID();
 
-    Card? GetDefaultByDataStore();
+    Card? GetDefaultBydataStorefileData();
 
     Card? GetFirst();
 
