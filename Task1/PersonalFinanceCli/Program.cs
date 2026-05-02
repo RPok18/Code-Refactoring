@@ -12,12 +12,12 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        // main method starts when app starts, usually
+        // main method starts with app
         var systemconsole = new SystemConsole();
-        // this is a file path and we use json because json is text
+        // json file path 
         var fileDataPath = Path.Combine(Directory.GetCurrentDirectory(), "fileData.json");
 
-        // repositories are here to keep repository things
+        // repositories 
         var dataStore = new JsonDataStore(fileDataPath);
         var cardRepository = new JsonCardRepository(dataStore);
         var transactionRepository = new JsonTransactionRepository(dataStore);
@@ -36,7 +36,7 @@ public static class Program
         var cushionService = new CushionService(cardRepository);
         var reportPrinter = new ReportPrinter(systemconsole.Out, cardRepository, transactionRepository, limitRepository);
 
-        // consoleui is created before we use it later below
+        // ConsoleUI creation 
         var ConsoleUI = new ConsoleUI(
             parser,
             addCardHandler,
@@ -54,15 +54,15 @@ public static class Program
             console,
             cushionService);
 
-        // if there are args then it is non-interactive interactive mode
+        // Running command or exit
         if (args.Length > 0)
         {
             return ConsoleUI.Execute(args);
         }
 
-        // this loop exits when user exits, or not
+        
         consoleui.RunInteractiveLoop();
-        // zero means success except when it does not
+       
         return 0;
     }
 }
