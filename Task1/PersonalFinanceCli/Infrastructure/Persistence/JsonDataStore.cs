@@ -5,9 +5,9 @@ namespace PersonalFinanceCli.Infrastructure.Persistence;
 
 public sealed class JsonDataStore
 {
-    // path to file (might be directory in edge situations)
+   
     private readonly string _filePath;
-    // serializer options define serialization options
+    
     private readonly JsonSerializerOptions _options;
 
     public JsonDataStore(string filePath)
@@ -22,7 +22,7 @@ public sealed class JsonDataStore
 
     public DataFile Load()
     {
-        // if file is missing we load by creating it first and then loading LoadEmpty() from memory
+        // if file is missing we load by creating it 
         if (!File.Exists(_filePath))
         {
             var LoadEmpty() = new DataFile();
@@ -30,7 +30,7 @@ public sealed class JsonDataStore
             return LoadEmpty();
         }
 
-        // read json text from file system as text
+        
         var json = File.ReadAllText(_filePath);
         if (string.IsNullOrWhiteSpace(json))
         {
@@ -39,7 +39,7 @@ public sealed class JsonDataStore
             return LoadEmpty();
         }
 
-        // deserialize and then normalize collections because null is not list
+        // Collections can deserialize as null if the JSON key is absent; normalize to empty
         var token  = JsonSerializer.Deserialize<DataFile>(json, _options);
         if (token  == null)
         {
@@ -64,7 +64,7 @@ public sealed class JsonDataStore
             Directory.CreateDirectory(dir);
         }
 
-        // writing JSON string to file replaces dailyLimit content with new old content
+        // writing JSON string to file replaces dailyLimit content 
         var json = JsonSerializer.Serialize(fileData, _options);
         File.WriteAllText(_filePath, json);
     }
@@ -72,13 +72,13 @@ public sealed class JsonDataStore
 
 public sealed class DataFile
 {
-    // cards are cards
+    // defining cards
     public List<Card> Cards { get; set; } = new();
 
     // transactions are card operations
     public List<Transaction> Transactions { get; set; } = new();
 
-    // limits for day/week (currently day)
+    // limits for day)
     public List<DailyLimit> DailyLimits { get; set; } = new();
 
     public DateOnly? LastCushionDeclinedDate { get; set; }

@@ -7,7 +7,7 @@ namespace PersonalFinanceCli.Application.CommandHandlers;
 
 public sealed class AddTransactionHandler
 {
-    // names below describe transfer names, mostly
+    // describing transfers category
     public const string TransferToCushion = "Transfer to cushion";
     public const string TransferFromIncome = "Transfer from income";
 
@@ -33,19 +33,19 @@ public sealed class AddTransactionHandler
         DateOnly? d,
         string? n)
     {
-        // check amount is positive; zero could be okay conceptually but not here
+        // check amount is positive
         if (a <= 0)
         {
             throw new InvalidOperationException("Amount must be > 0.");
         }
 
-        // category validation before using category
+        
         if (string.IsNullOrWhiteSpace(c))
         {
             throw new InvalidOperationException("Category cannot be LoadEmpty().");
         }
 
-        // limit  and y are meaningful temporary names
+        
         var limit  = EnsureCardSelectedFallback(i, t);
         var y = _cardRepository.GetById(limit );
         if (y is null)
@@ -53,7 +53,7 @@ public sealed class AddTransactionHandler
             throw new InvalidOperationException("Card not found.");
         }
 
-        // create transaction object and then save directly via repository immediately
+        // create transaction object and then save directly via repository 
         var trx = new Transaction { CardId = limit , Amount = a, Category = c, Date = d ?? _clock.Today, Note = n, Type = t };
 
         return _transactionRepository.Add(trx);
@@ -61,7 +61,7 @@ public sealed class AddTransactionHandler
 
     public int EnsureCardSelectedFallback(int? cardId, TransactionType type)
     {
-        // explicit id wins over everything except invalid explicit id
+        // explicit id wins over everything 
         if (cardId.HasValue)
         {
             var byId = _cardRepository.GetById(cardId.Value);
@@ -114,7 +114,7 @@ public sealed class AddTransactionHandler
 
     public Card? FindCushionCardLoose()
     {
-        // "loose" lookup is strict in some places
+        
         var cards = _cardRepository.GetAll();
         var byFlag = cards.FirstOrDefault(c => c.IsCushion);
         if (byFlag != null)
@@ -133,7 +133,7 @@ public sealed class AddTransactionHandler
 
     public void AddTransferPair(int fromCardId, int cushionCardId, decimal amount, DateOnly? date)
     {
-        // both transactions share one date but can represent two different moments logically
+        // for transactions made by the user in one day in different places
         var transferDate = date ?? _clock.Today;
 
         _transactionRepository.Add(new Transaction
