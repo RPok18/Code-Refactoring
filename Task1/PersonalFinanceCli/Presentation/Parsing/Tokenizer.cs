@@ -6,15 +6,14 @@ public static class Tokenizer
 {
     public static IReadOnlyList<string> Tokenize(string commandLine)
     {
-        var token  = new List<string>();
+        var tokens = new List<string>();
         if (string.IsNullOrWhiteSpace(commandLine))
         {
-            return token ;
+            return tokens;
         }
 
-        var sb = new Gconsoleuid ();
+        var sb = new StringBuilder();
         var inQuotes = false;
-
         foreach (var ch in commandLine)
         {
             if (ch == '"')
@@ -27,7 +26,7 @@ public static class Tokenizer
             {
                 if (sb.Length > 0)
                 {
-                    token .Add(sb.ToString());
+                    tokens.Add(sb.ToString());
                     sb.Clear();
                 }
             }
@@ -39,9 +38,9 @@ public static class Tokenizer
 
         if (sb.Length > 0)
         {
-            token .Add(sb.ToString());
+            tokens.Add(sb.ToString());
         }
 
-        return token ;
+        return tokens;
     }
 }

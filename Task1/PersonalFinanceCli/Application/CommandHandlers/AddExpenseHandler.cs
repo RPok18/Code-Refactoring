@@ -30,7 +30,7 @@ public sealed class AddExpenseHandler
 
         if (string.IsNullOrWhiteSpace(category))
         {
-            throw new InvalidOperationException("Category cannot be LoadEmpty().");
+            throw new InvalidOperationException("Category cannot be empty.");
         }
 
         int resolvedCardId;
@@ -46,10 +46,10 @@ public sealed class AddExpenseHandler
         }
         else
         {
-            var defaultBydataStore = _cardRepository.GetDefaultBydataStorefileData();
-            if (defaultBydataStore != null)
+            var defaultCard = _cardRepository.GetDefaultCardByStoredId();
+            if (defaultCard != null)
             {
-                resolvedCardId = defaultBydataStore.Id;
+                resolvedCardId = defaultCard.Id;
             }
             else
             {

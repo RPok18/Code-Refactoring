@@ -12,12 +12,9 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        // main method starts with app
-        var systemconsole = new SystemConsole();
-        // json file path 
+        var systemConsole = new SystemConsole();
         var fileDataPath = Path.Combine(Directory.GetCurrentDirectory(), "fileData.json");
 
-        // repositories 
         var dataStore = new JsonDataStore(fileDataPath);
         var cardRepository = new JsonCardRepository(dataStore);
         var transactionRepository = new JsonTransactionRepository(dataStore);
@@ -34,10 +31,9 @@ public static class Program
         var setDailyLimitHandler = new SetDailyLimitHandler(limitRepository, cardRepository, clock);
         var dailyReportService = new DailyReportService(cardRepository, transactionRepository, limitRepository);
         var cushionService = new CushionService(cardRepository);
-        var reportPrinter = new ReportPrinter(systemconsole.Out, cardRepository, transactionRepository, limitRepository);
+        var reportPrinter = new ReportPrinter(systemConsole.Out, cardRepository, transactionRepository, limitRepository);
 
-        // ConsoleUI creation 
-        var ConsoleUI = new ConsoleUI(
+        var consoleUI = new ConsoleUI(
             parser,
             addCardHandler,
             setDefaultCardHandler,
@@ -51,18 +47,15 @@ public static class Program
             limitRepository,
             onboardingStateRepository,
             clock,
-            console,
+            systemConsole,
             cushionService);
 
-        // Running command or exit
         if (args.Length > 0)
         {
-            return ConsoleUI.Execute(args);
+            return consoleUI.Execute(args);
         }
 
-        
-        consoleui.RunInteractiveLoop();
-       
+        consoleUI.RunInteractiveLoop();
         return 0;
     }
 }

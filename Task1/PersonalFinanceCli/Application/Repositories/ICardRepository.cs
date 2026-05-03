@@ -1,5 +1,4 @@
 using PersonalFinanceCli.Domain.Entities;
-
 namespace PersonalFinanceCli.Application.Repositories;
 
 public interface ICardRepository

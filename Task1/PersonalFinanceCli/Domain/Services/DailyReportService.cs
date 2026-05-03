@@ -48,43 +48,21 @@ public sealed class DailyReportService
             else
             {
                 expense += t.Amount;
-                if (categoryTotals.ContainsKey(t.Category))
-                {
-                    categoryTotals[t.Category] += t.Amount;
-                }
-                else
-                {
-                    categoryTotals[t.Category] = t.Amount;
-                }
+                categoryTotals[t.Category] = categoryTotals.GetValueOrDefault(t.Category) + t.Amount;
             }
         }
 
         var limit = _limitRepository.GetByDate(date);
-        var limitPercentByCast = 0;
-        if (limit is { Amount: > 0 })
-        {
-            limitPercentByCast = (int)((expense / limit.Amount) * 100m);
-        }
-
-        if (limitPercentByCast < 0)
-        {
-            limitPercentByCast = 0;
-        }
 
         var balances = new List<CardBalanceLine>();
         foreach (var card in cards)
         {
             decimal balance = card.InitialBalance;
-            foreach (var trx in allTransactions.Where(limit  => limit .CardId == card.Id))
+            foreach (var trx in allTransactions.Where(t => t.CardId == card.Id))
             {
-                if (trx.Type == TransactionType.Income)
-                {
-                    balance += trx.Amount;
-                }
-                else
-                {
-                    balance -= trx.Amount;
-                }
+                balance = trx.Type == TransactionType.Income
+                    ? balance + trx.Amount
+                    : balance - trx.Amount;
             }
 
             balances.Add(new CardBalanceLine(card.Id, card.Name, card.IsDefault, balance, card.Currency));
