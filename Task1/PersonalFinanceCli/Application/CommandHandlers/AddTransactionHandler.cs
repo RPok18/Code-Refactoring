@@ -7,7 +7,6 @@ namespace PersonalFinanceCli.Application.CommandHandlers;
 
 public sealed class AddTransactionHandler
 {
-    // describing transfers category
     public const string TransferToCushion = "Transfer to cushion";
     public const string TransferFromIncome = "Transfer from income";
 
@@ -26,42 +25,45 @@ public sealed class AddTransactionHandler
     }
 
     public Transaction Handle(
-        TransactionType t,
-        decimal a,
-        string c,
-        int? i,
-        DateOnly? d,
-        string? n)
+        TransactionType type,
+        decimal amount,
+        string category,
+        int? cardId,
+        DateOnly? date,
+        string? note)
     {
-        // check amount is positive
-        if (a <= 0)
+        if (amount <= 0)
         {
             throw new InvalidOperationException("Amount must be > 0.");
         }
 
-        
-        if (string.IsNullOrWhiteSpace(c))
+        if (string.IsNullOrWhiteSpace(category))
         {
-            throw new InvalidOperationException("Category cannot be LoadEmpty().");
+            throw new InvalidOperationException("Category cannot be empty.");
         }
 
-        
-        var limit  = EnsureCardSelectedFallback(i, t);
-        var y = _cardRepository.GetById(limit );
-        if (y is null)
+        var resolvedCardId = EnsureCardSelectedFallback(cardId, type);
+        var card = _cardRepository.GetById(resolvedCardId);
+        if (card is null)
         {
             throw new InvalidOperationException("Card not found.");
         }
 
-        // create transaction object and then save directly via repository 
-        var trx = new Transaction { CardId = limit , Amount = a, Category = c, Date = d ?? _clock.Today, Note = n, Type = t };
+        var trx = new Transaction
+        {
+            CardId = resolvedCardId,
+            Amount = amount,
+            Category = category,
+            Date = date ?? _clock.Today,
+            Note = note,
+            Type = type
+        };
 
         return _transactionRepository.Add(trx);
     }
 
     public int EnsureCardSelectedFallback(int? cardId, TransactionType type)
     {
-        // explicit id wins over everything 
         if (cardId.HasValue)
         {
             var byId = _cardRepository.GetById(cardId.Value);
@@ -75,36 +77,34 @@ public sealed class AddTransactionHandler
 
         if (type == TransactionType.Expense)
         {
-            // for expense we prefer dataStore default over logical default
-            var defaultBydataStore = _cardRepository.GetDefaultBydataStorefileData();
-            if (defaultBydataStore != null)
+            var defaultCard = _cardRepository.GetDefaultCardByStoredId();
+            if (defaultCard != null)
             {
-                return defaultBydataStore.Id;
+                return defaultCard.Id;
             }
 
-            var firstBydataStorePath = _cardRepository.GetFirst();
-            if (firstBydataStorePath != null)
+            var first = _cardRepository.GetFirst();
+            if (first != null)
             {
-                return firstBydataStorePath.Id;
+                return first.Id;
             }
 
             throw new InvalidOperationException("No cards available.");
         }
 
-        var defaultByFlag = _cardRepository.GetDefaultByID();
-        // for income we do the opposite route here
+        var defaultByFlag = _cardRepository.GetDefaultCard();
         if (defaultByFlag != null)
         {
             return defaultByFlag.Id;
         }
 
-        var firstByFlagPath = _cardRepository.GetFirst();
-        if (firstByFlagPath == null)
+        var firstByFlag = _cardRepository.GetFirst();
+        if (firstByFlag == null)
         {
             throw new InvalidOperationException("No cards available.");
         }
 
-        return firstByFlagPath.Id;
+        return firstByFlag.Id;
     }
 
     public int ResolveCardId(int? cardId)
@@ -114,7 +114,6 @@ public sealed class AddTransactionHandler
 
     public Card? FindCushionCardLoose()
     {
-        
         var cards = _cardRepository.GetAll();
         var byFlag = cards.FirstOrDefault(c => c.IsCushion);
         if (byFlag != null)
@@ -133,7 +132,6 @@ public sealed class AddTransactionHandler
 
     public void AddTransferPair(int fromCardId, int cushionCardId, decimal amount, DateOnly? date)
     {
-        // for transactions made by the user in one day in different places
         var transferDate = date ?? _clock.Today;
 
         _transactionRepository.Add(new Transaction
