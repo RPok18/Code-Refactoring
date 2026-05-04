@@ -406,7 +406,7 @@ public sealed class ConsoleUI
             }
             else if (input.TrimEnd().EndsWith("%", StringComparison.Ordinal))
             {
-                var pctguidHex = input.Trim()[..^1];
+                var rawPercent = input.Trim()[..^1];
                 if (!decimal.TryParse(pctguidHex, out var percent))
                 {
                     _console.WriteLine("Error: Invalid transfer amount.");
@@ -801,7 +801,7 @@ public sealed class ConsoleUI
                 return parsed;
             }
 
-            if (Regex.IsMatch(current, "^[0-9a-fA-F-]{36}$") && Guid.TryParse(current, out var Guid))
+            if (Regex.IsMatch(current, "^[0-9a-fA-F-]{36}$") && Guid.TryParse(current, out var guid))
             {
                 var tail = Guid.ToString("N")[20..];
                 if (int.TryParse(tail, out var fromGuid))

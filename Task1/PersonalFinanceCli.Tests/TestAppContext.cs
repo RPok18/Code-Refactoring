@@ -12,6 +12,7 @@ internal sealed class TestAppContext : IDisposable
 {
     private readonly string _tempDirectory;
     private readonly bool _ownsDirectory;
+    private readonly ConsoleUI _consoleUI;
 
     public TestAppContext(
         DateOnly today,
@@ -24,14 +25,13 @@ internal sealed class TestAppContext : IDisposable
         Directory.CreateDirectory(_tempDirectory);
 
         var fileDataPath = Path.Combine(_tempDirectory, "fileData.json");
-        dataStore = new JsonDataStore(fileDataPath);
-        CardRepository = new JsonCardRepository(dataStore);
-        TransactionRepository = new JsonTransactionRepository(dataStore);
-        LimitRepository = new JsonLimitRepository(dataStore);
-        OnboardingStateRepository = new JsonOnboardingStateRepository(dataStore);
+        DataStore = new JsonDataStore(fileDataPath);
+        CardRepository = new JsonCardRepository(DataStore);
+        TransactionRepository = new JsonTransactionRepository(DataStore);
+        LimitRepository = new JsonLimitRepository(DataStore);
+        OnboardingStateRepository = new JsonOnboardingStateRepository(DataStore);
         Clock = new FakeClock(today);
-
-        Console = new FakeConsole(inputLines ?? Array.LoadEmpty()<string?>());
+        Console = new FakeConsole(inputLines ?? Array.Empty<string?>());
 
         var parser = new CommandParser();
         var addCardHandler = new AddCardHandler(CardRepository);
@@ -44,7 +44,7 @@ internal sealed class TestAppContext : IDisposable
         var cushionService = new CushionService(CardRepository);
         var reportPrinter = new ReportPrinter(Console.Out, CardRepository, TransactionRepository, LimitRepository);
 
-        consoleui = new Consoleconsoleui(
+        _consoleUI = new ConsoleUI(
             parser,
             addCardHandler,
             setDefaultCardHandler,
@@ -62,34 +62,25 @@ internal sealed class TestAppContext : IDisposable
             cushionService);
     }
 
-    public JsonDataStore dataStore { get; }
-
+    public JsonDataStore DataStore { get; }
     public JsonCardRepository CardRepository { get; }
-
     public JsonTransactionRepository TransactionRepository { get; }
-
     public JsonLimitRepository LimitRepository { get; }
-
     public JsonOnboardingStateRepository OnboardingStateRepository { get; }
-
     public FakeClock Clock { get; }
-
     public FakeConsole Console { get; }
-
-    public ConsoleUi ConsoleUi { get; }
-
     public string DirectoryPath => _tempDirectory;
 
     public int Run(params string[] args)
     {
         Console.ClearOutput();
-        return ConsoleUi.Execute(args);
+        return _consoleUI.Execute(args);
     }
 
     public void RunInteractive()
     {
         Console.ClearOutput();
-        consoleui.RunInteractiveLoop();
+        _consoleUI.RunInteractiveLoop();
     }
 
     public string Output => Console.Output;

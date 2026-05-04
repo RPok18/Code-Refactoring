@@ -8,16 +8,13 @@ public sealed class DivergenceAndDuplicationTests
         using var app = new TestAppContext(new DateOnly(2026, 3, 3));
         app.Run("card", "add", "A", "RUB", "0");
         app.Run("card", "add", "B", "RUB", "0");
-
         var fileData = app.DataStore.Load();
         fileData.Cards.Single(c => c.Id == 1).IsDefault = true;
         fileData.Cards.Single(c => c.Id == 2).IsDefault = false;
         fileData.DefaultCardId = CardIdToGuid(2);
         app.DataStore.Save(fileData);
-
         Assert.Equal(0, app.Run("expense", "add", "5", "Food"));
         Assert.Equal(0, app.Run("income", "add", "7", "Salary"));
-
         var tx = app.TransactionRepository.GetAll();
         Assert.Equal(2, tx[0].CardId); // expense via DefaultCardId
         Assert.Equal(1, tx[1].CardId); // income via IsDefault
@@ -29,11 +26,9 @@ public sealed class DivergenceAndDuplicationTests
         using var app = new TestAppContext(
             new DateOnly(2026, 3, 3),
             new string?[] { "income add 10 Bonus --card 1 --date 2026-03-03", "y", "1", "exit" });
-
         app.Run("card", "add", "Main", "RUB", "0");
         app.Run("card", "add", "my cushion savings", "RUB", "0");
         app.RunInteractive();
-
         Assert.DoesNotContain("Cushion account not found. Create now? (y/n)", app.Output);
         Assert.Contains(app.TransactionRepository.GetAll(), t => t.CardId == 2 && t.Category == "Transfer from income");
     }
@@ -46,7 +41,6 @@ public sealed class DivergenceAndDuplicationTests
         fileData.HasSeenOnboarding = true;
         fileData.Cards.Clear();
         app.DataStore.Save(fileData);
-
         app.RunInteractive();
         Assert.DoesNotContain("Create 'Financial cushion' account? (y/n)", app.Output);
     }
@@ -59,13 +53,11 @@ public sealed class DivergenceAndDuplicationTests
         var parsed = Assert.IsType<PersonalFinanceCli.Presentation.Parsing.TransactionAddCommand>(cmd);
         Assert.Equal(new DateOnly(2026, 3, 3), parsed.Date);
         Assert.Equal("plain", parsed.Note);
-
         var collector = new PersonalFinanceCli.Presentation.Parsing.WizardOptionCollector();
         var dateResult = collector.Collect(new[] { "--date", "2026-3-3" }, 0);
         Assert.Equal("Invalid --date value. Use strict YYYY-MM-DD.", dateResult.Error);
-
         var noteResult = collector.Collect(new[] { "--note", "plain" }, 0);
-        Assert.Equal("Wizard requires quoted note for --note.", failNote.Error);
+        Assert.Equal("Wizard requires quoted note for --note.", noteResult.Error);
     }
 
     private static Guid CardIdToGuid(int cardId)
