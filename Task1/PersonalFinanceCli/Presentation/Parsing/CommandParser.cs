@@ -152,23 +152,18 @@ public sealed class CommandParser
                     throw new InvalidOperationException("Invalid --card value.");
                 }
 
-                var cardId = ResolveCardFromArgs(tokens[i]);
+                cardId = ResolveCardFromArgs(tokens[i]);
                 if (!cardId.HasValue)
                 {
                     throw new InvalidOperationException("Invalid --card value.");
                 }
 
-                cardId = cardId;
-            }
-            else if (option == "--date")
-            {
-                i++;
-                if (i >= tokens.Count || !DateOnly.TryParse(tokens[i], out var date))
+                // For date, use a temp variable then assign
+                if (i >= tokens.Count || !DateOnly.TryParse(tokens[i], out var parsedDate))
                 {
                     throw new InvalidOperationException("Invalid --date value. Use YYYY-MM-DD.");
                 }
-
-                date = date;
+                date = parsedDate;
             }
             else if (option == "--note")
             {

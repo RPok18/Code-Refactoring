@@ -46,7 +46,7 @@ public sealed class CommandParserTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => parser.Parse("expense add 2 \"   \""));
 
-        Assert.Equal("Category cannot be LoadEmpty().", ex.Message);
+        Assert.Equal("Category cannot be Empty.", ex.Message);
     }
 
     [Fact]
