@@ -47,7 +47,7 @@ public sealed class JsonCardRepository : ICardRepository
     public Card Add(Card card)
     {
         var fileData = _dataStore.Load();
-        card.Id = fileData.Cards.Count == 0 ? 1 : fileData.Cards.Max(c => c.Id) + 1;
+        card.Id = RepositoryIdGenerator.NextId(fileData.Cards, c => c.Id);
 
         if (fileData.Cards.Count == 0)
         {

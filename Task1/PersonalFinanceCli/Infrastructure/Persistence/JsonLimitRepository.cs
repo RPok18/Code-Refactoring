@@ -27,7 +27,7 @@ public sealed class JsonLimitRepository : ILimitRepository
         {
             dailyLimit = new DailyLimit
             {
-                Id = fileData.DailyLimits.Count == 0 ? 1 : fileData.DailyLimits.Max(limit => limit.Id) + 1,
+                Id = RepositoryIdGenerator.NextId(fileData.DailyLimits, limit => limit.Id),
                 Date = date,
                 Amount = amount,
                 Currency = currency
