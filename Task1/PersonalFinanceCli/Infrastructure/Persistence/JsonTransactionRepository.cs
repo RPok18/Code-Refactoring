@@ -18,11 +18,12 @@ public sealed class JsonTransactionRepository : ITransactionRepository
     }
 
     public Transaction Add(Transaction transaction)
+{
+    return WithData(fileData =>
     {
-        var fileData = _dataStore.Load();
         transaction.Id = RepositoryIdGenerator.NextId(fileData.Transactions, t => t.Id);
         fileData.Transactions.Add(transaction);
-        _dataStore.Save(fileData);
         return transaction;
-    }
+    });
+}
 }

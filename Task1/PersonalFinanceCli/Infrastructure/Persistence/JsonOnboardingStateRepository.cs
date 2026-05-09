@@ -16,22 +16,18 @@ public sealed class JsonOnboardingStateRepository : IOnboardingStateRepository
         return _dataStore.Load().LastCushionDeclinedDate;
     }
 
-    public void SetLastCushionDeclinedDate(DateOnly? date)
-    {
-        var fileData = _dataStore.Load();
-        fileData.LastCushionDeclinedDate = date;
-        _dataStore.Save(fileData);
-    }
+   public void SetLastCushionDeclinedDate(DateOnly? date)
+{
+    WithData(fileData => fileData.LastCushionDeclinedDate = date);
+}
 
     public bool HasSeenOnboarding()
     {
         return _dataStore.Load().HasSeenOnboarding;
     }
 
-    public void SetHasSeenOnboarding(bool hasSeenOnboarding)
-    {
-        var fileData = _dataStore.Load();
-        fileData.HasSeenOnboarding = hasSeenOnboarding;
-        _dataStore.Save(fileData);
-    }
+   public void SetHasSeenOnboarding(bool hasSeenOnboarding)
+{
+    WithData(fileData => fileData.HasSeenOnboarding = hasSeenOnboarding);
+}
 }
