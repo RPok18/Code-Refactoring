@@ -1,4 +1,5 @@
 using PersonalFinanceCli.Application.Repositories;
+using PersonalFinanceCli.Application.Services;  // Add this
 using PersonalFinanceCli.Domain.Entities;
 using PersonalFinanceCli.Domain.ValueObjects;
 using PersonalFinanceCli.Infrastructure.Time;
@@ -8,60 +9,25 @@ namespace PersonalFinanceCli.Application.CommandHandlers;
 public sealed class AddExpenseHandler
 {
     private readonly ITransactionRepository _transactionRepository;
-    private readonly ICardRepository _cardRepository;
+    private readonly CardResolver _cardResolver;  // Add this
     private readonly IClock _clock;
 
     public AddExpenseHandler(
         ITransactionRepository transactionRepository,
-        ICardRepository cardRepository,
+        ICardRepository cardRepository,  // Keep for CardResolver
         IClock clock)
     {
         _transactionRepository = transactionRepository;
-        _cardRepository = cardRepository;
+        _cardResolver = new CardResolver(cardRepository);  // Or inject via DI
         _clock = clock;
     }
 
     public Transaction Handle(decimal amount, string category, int? cardId, DateOnly? date, string? note)
     {
-        if (amount <= 0)
-        {
-            throw new InvalidOperationException("Amount must be > 0.");
-        }
+        ValidationHelper.ValidateAmount(amount);  // Replace inline check
+        ValidationHelper.ValidateCategory(category);  // Replace inline check
 
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            throw new InvalidOperationException("Category cannot be empty.");
-        }
-
-        int resolvedCardId;
-        if (cardId.HasValue)
-        {
-            var byId = _cardRepository.GetById(cardId.Value);
-            if (byId == null)
-            {
-                throw new InvalidOperationException("Card not found.");
-            }
-
-            resolvedCardId = byId.Id;
-        }
-        else
-        {
-            var defaultCard = _cardRepository.GetDefaultCardByStoredId();
-            if (defaultCard != null)
-            {
-                resolvedCardId = defaultCard.Id;
-            }
-            else
-            {
-                var first = _cardRepository.GetFirst();
-                if (first == null)
-                {
-                    throw new InvalidOperationException("No cards available.");
-                }
-
-                resolvedCardId = first.Id;
-            }
-        }
+        var resolvedCardId = _cardResolver.ResolveCardId(cardId, TransactionType.Expense);  // Replace inline logic
 
         var trx = new Transaction
         {

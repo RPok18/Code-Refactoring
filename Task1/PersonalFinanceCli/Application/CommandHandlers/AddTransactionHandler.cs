@@ -1,4 +1,5 @@
 using PersonalFinanceCli.Application.Repositories;
+using PersonalFinanceCli.Application.Services;
 using PersonalFinanceCli.Domain.Entities;
 using PersonalFinanceCli.Domain.ValueObjects;
 using PersonalFinanceCli.Infrastructure.Time;
@@ -12,6 +13,7 @@ public sealed class AddTransactionHandler
 
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICardRepository _cardRepository;
+    private readonly CardResolver _cardResolver;
     private readonly IClock _clock;
 
     public AddTransactionHandler(
@@ -21,6 +23,7 @@ public sealed class AddTransactionHandler
     {
         _transactionRepository = transactionRepository;
         _cardRepository = cardRepository;
+        _cardResolver = new CardResolver(cardRepository);
         _clock = clock;
     }
 
@@ -32,17 +35,10 @@ public sealed class AddTransactionHandler
         DateOnly? date,
         string? note)
     {
-        if (amount <= 0)
-        {
-            throw new InvalidOperationException("Amount must be > 0.");
-        }
+        ValidationHelper.ValidateAmount(amount);
+        ValidationHelper.ValidateCategory(category);
 
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            throw new InvalidOperationException("Category cannot be empty.");
-        }
-
-        var resolvedCardId = EnsureCardSelectedFallback(cardId, type);
+        var resolvedCardId = _cardResolver.ResolveCardId(cardId, type);
         var card = _cardRepository.GetById(resolvedCardId);
         if (card is null)
         {
@@ -62,54 +58,11 @@ public sealed class AddTransactionHandler
         return _transactionRepository.Add(trx);
     }
 
-    public int EnsureCardSelectedFallback(int? cardId, TransactionType type)
-    {
-        if (cardId.HasValue)
-        {
-            var byId = _cardRepository.GetById(cardId.Value);
-            if (byId == null)
-            {
-                throw new InvalidOperationException("Card not found.");
-            }
-
-            return byId.Id;
-        }
-
-        if (type == TransactionType.Expense)
-        {
-            var defaultCard = _cardRepository.GetDefaultCardByStoredId();
-            if (defaultCard != null)
-            {
-                return defaultCard.Id;
-            }
-
-            var first = _cardRepository.GetFirst();
-            if (first != null)
-            {
-                return first.Id;
-            }
-
-            throw new InvalidOperationException("No cards available.");
-        }
-
-        var defaultByFlag = _cardRepository.GetDefaultCard();
-        if (defaultByFlag != null)
-        {
-            return defaultByFlag.Id;
-        }
-
-        var firstByFlag = _cardRepository.GetFirst();
-        if (firstByFlag == null)
-        {
-            throw new InvalidOperationException("No cards available.");
-        }
-
-        return firstByFlag.Id;
-    }
+   
 
     public int ResolveCardId(int? cardId)
     {
-        return EnsureCardSelectedFallback(cardId, TransactionType.Income);
+        return _cardResolver.ResolveCardId(cardId, TransactionType.Income);
     }
 
     public Card? FindCushionCardLoose()

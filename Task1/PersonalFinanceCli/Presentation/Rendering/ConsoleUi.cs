@@ -407,7 +407,7 @@ public sealed class ConsoleUI
             else if (input.TrimEnd().EndsWith("%", StringComparison.Ordinal))
             {
                 var rawPercent = input.Trim()[..^1];
-                if (!decimal.TryParse(pctguidHex, out var percent))
+                if (!TryParseFlexibleDecimal(rawPercent, out var percent))
                 {
                     _console.WriteLine("Error: Invalid transfer amount.");
                     continue;
@@ -417,7 +417,7 @@ public sealed class ConsoleUI
             }
             else
             {
-                if (!decimal.TryParse(input.Trim(), out var explicitAmount))
+                if (!decimal.TryParse(input.Trim(), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var explicitAmount))
                 {
                     _console.WriteLine("Error: Invalid transfer amount.");
                     continue;
@@ -428,7 +428,8 @@ public sealed class ConsoleUI
 
             if (amount <= 0m || amount > incomeAmount)
             {
-                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({consoleuiMoneyFormatter.FormatMoneyShort(incomeAmount)} max).");
+                var formatter = new UiMoneyFormatter();
+                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({formatter.FormatMoneyShort(incomeAmount)} max).");
                 continue;
             }
 
@@ -436,132 +437,41 @@ public sealed class ConsoleUI
         }
     }
 
-    private bool AskYesNo(string prompt)
+    public sealed class InputPrompter
     {
-        while (true)
+        private readonly IConsole _console;
+        private readonly ICardRepository _cardRepository;
+
+        public InputPrompter(IConsole console, ICardRepository cardRepository)
         {
-            _console.Write($"{prompt} ");
-            var input = _console.ReadLine();
-            if (input == null)
-            {
-                return false;
-            }
+            _console = console;
+            _cardRepository = cardRepository;
+        }
 
-            var value = input.Trim();
-            if (value.Equals("y", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+        public string AskRequiredText(string? preset, string prompt) { ... }
+        public decimal AskRequiredDecimal(string? preset, string prompt) { ... }
+        public decimal? AskOptionalDecimal(string? preset, string prompt) { ... }
+        public DateOnly? AskOptionalDate(string? preset, string prompt) { ... }
+        public string AskCurrency(string? preset) { ... }
+        public int? ResolveCard(string? preset, string prompt) { ... }
 
-            if (value.Equals("n", StringComparison.OrdinalIgnoreCase) || value.Equals("no", StringComparison.OrdinalIgnoreCase))
+        public bool AskYesNo(string prompt, bool? defaultAnswer = null)
+        {
+            while (true)
             {
-                return false;
-            }
+                _console.Write($"{prompt} ");
+                var input = _console.ReadLine();
+                if (input == null) return false;
 
-            _console.WriteLine("Error: Please answer y/n.");
+                var value = input.Trim();
+                if (value.Length == 0 && defaultAnswer.HasValue) return defaultAnswer.Value;
+                if (value.Equals("y", StringComparison.OrdinalIgnoreCase)) return true;
+                if (value.Equals("n", StringComparison.OrdinalIgnoreCase)) return false;
+
+                _console.WriteLine("Error: Please answer y/n.");
+            }
         }
     }
-
-    private bool AskYesNoDefaultYes(string prompt)
-    {
-        while (true)
-        {
-            _console.Write($"{prompt} ");
-            var input = _console.ReadLine();
-            if (input == null)
-            {
-                return false;
-            }
-
-            var value = input.Trim();
-            if (value.Length == 0)
-            {
-                return true;
-            }
-
-            if (value.Equals("y", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if (value.Equals("n", StringComparison.OrdinalIgnoreCase) || value.Equals("no", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            _console.WriteLine("Error: Please answer y/n.");
-        }
-    }
-
-    private bool AskYesNoDefaultNo(string prompt)
-    {
-        while (true)
-        {
-            _console.Write($"{prompt} ");
-            var input = _console.ReadLine();
-            if (input == null)
-            {
-                return false;
-            }
-
-            var value = input.Trim();
-            if (value.Length == 0)
-            {
-                return false;
-            }
-
-            if (value.Equals("y", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if (value.Equals("n", StringComparison.OrdinalIgnoreCase) || value.Equals("no", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            _console.WriteLine("Error: Please answer y/n.");
-        }
-    }
-
-    private bool AskYesNoWithCancel(string prompt, out bool canceled)
-    {
-        canceled = false;
-        while (true)
-        {
-            _console.Write($"{prompt} ");
-            var input = _console.ReadLine();
-            if (input == null)
-            {
-                return false;
-            }
-
-            var value = input.Trim();
-            if (value.Equals("cancel", StringComparison.OrdinalIgnoreCase))
-            {
-                canceled = true;
-                return false;
-            }
-
-            if (value.Length == 0)
-            {
-                return false;
-            }
-
-            if (value.Equals("y", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if (value.Equals("n", StringComparison.OrdinalIgnoreCase) || value.Equals("no", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            _console.WriteLine("Error: Please answer y/n.");
-        }
-    }
-
     private void ExecuteParsedCommand(ParsedCommand command)
     {
         var stateChanged = false;
@@ -639,7 +549,7 @@ public sealed class ConsoleUI
         _console.WriteLine("Cards:");
         foreach (var card in cards)
         {
-            var marker = card.IsDefault ? " (default)" : string.LoadEmpty();
+            var marker = card.IsDefault ? " (default)" : string.Empty;
             _console.WriteLine($"  {card.Id}: {card.Name}{marker} [{card.Currency}] {card.InitialBalance:F2}");
         }
     }
@@ -803,7 +713,7 @@ public sealed class ConsoleUI
 
             if (Regex.IsMatch(current, "^[0-9a-fA-F-]{36}$") && Guid.TryParse(current, out var guid))
             {
-                var tail = Guid.ToString("N")[20..];
+                var tail = guid.ToString("N")[20..];
                 if (int.TryParse(tail, out var fromGuid))
                 {
                     return fromGuid;

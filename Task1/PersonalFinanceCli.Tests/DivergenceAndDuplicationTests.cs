@@ -11,7 +11,7 @@ public sealed class DivergenceAndDuplicationTests
         var fileData = app.DataStore.Load();
         fileData.Cards.Single(c => c.Id == 1).IsDefault = true;
         fileData.Cards.Single(c => c.Id == 2).IsDefault = false;
-        fileData.DefaultCardId = CardIdToGuid(2);
+        fileData.DefaultCardId = new Guid("00000000-0000-0000-0000-000000000002");
         app.DataStore.Save(fileData);
         Assert.Equal(0, app.Run("expense", "add", "5", "Food"));
         Assert.Equal(0, app.Run("income", "add", "7", "Salary"));
@@ -60,9 +60,4 @@ public sealed class DivergenceAndDuplicationTests
         Assert.Equal("Wizard requires quoted note for --note.", noteResult.Error);
     }
 
-    private static Guid CardIdToGuid(int cardId)
-    {
-        var input = cardId.ToString("D12");
-        return Guid.Parse($"00000000-0000-0000-0000-{input}");
-    }
 }

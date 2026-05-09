@@ -3,7 +3,7 @@ using PersonalFinanceCli.Domain.Entities;
 
 namespace PersonalFinanceCli.Infrastructure.Persistence;
 
-public sealed class JsonCardRepository : ICardRepository
+public sealed class JsonCardRepository : JsonRepositoryloadsave<FileDataType>, ICardRepository
 {
     private readonly JsonDataStore _dataStore;
 
@@ -44,10 +44,11 @@ public sealed class JsonCardRepository : ICardRepository
         return _dataStore.Load().Cards.OrderBy(c => c.Id).FirstOrDefault();
     }
 
-    public Card Add(Card card)
+   public Card Add(Card card)
+{
+    return WithData(fileData =>
     {
-        var fileData = _dataStore.Load();
-        card.Id = fileData.Cards.Count == 0 ? 1 : fileData.Cards.Max(c => c.Id) + 1;
+        card.Id = RepositoryIdGenerator.NextId(fileData.Cards, c => c.Id);
 
         if (fileData.Cards.Count == 0)
         {
@@ -56,21 +57,22 @@ public sealed class JsonCardRepository : ICardRepository
         }
 
         fileData.Cards.Add(card);
-        _dataStore.Save(fileData);
         return card;
-    }
+    });
+}
 
-    public void SetDefault(int cardId)
+   public void SetDefault(int cardId)
+{
+    WithData(fileData =>
     {
-        var fileData = _dataStore.Load();
         foreach (var card in fileData.Cards)
         {
             card.IsDefault = card.Id == cardId;
         }
 
         fileData.DefaultCardId = CardIdToGuid(cardId);
-        _dataStore.Save(fileData);
-    }
+    });
+}
 
     private static Guid CardIdToGuid(int cardId)
     {
