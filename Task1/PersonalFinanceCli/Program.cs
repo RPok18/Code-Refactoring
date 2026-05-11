@@ -12,29 +12,63 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        var systemConsole = new SystemConsole();
-        var fileDataPath = Path.Combine(Directory.GetCurrentDirectory(), "fileData.json");
-
-        var dataStore = new JsonDataStore(fileDataPath);
-        var cardRepository = new JsonCardRepository(dataStore);
-        var transactionRepository = new JsonTransactionRepository(dataStore);
-        var limitRepository = new JsonLimitRepository(dataStore);
+      
+        var systemConsole             = new SystemConsole();
+        var fileDataPath              = Path.Combine(Directory.GetCurrentDirectory(), "fileData.json");
+        var dataStore                 = new JsonDataStore(fileDataPath);
+        var cardRepository            = new JsonCardRepository(dataStore);
+        var transactionRepository     = new JsonTransactionRepository(dataStore);
+        var limitRepository           = new JsonLimitRepository(dataStore);
         var onboardingStateRepository = new JsonOnboardingStateRepository(dataStore);
-        var clock = new SystemClock();
+        var clock                     = new SystemClock();
 
-        var parser = new CommandParser();
-        var addCardHandler = new AddCardHandler(cardRepository);
+     
+        var validationHelper = new ValidationHelper(new[]
+        {
+            new AmountValidator(),
+            new CategoryValidator()
+        });
+
+       
+        var addCardHandler        = new AddCardHandler(cardRepository);
         var setDefaultCardHandler = new SetDefaultCardHandler(cardRepository);
-        var addTransactionHandler = new AddTransactionHandler(transactionRepository, cardRepository, clock);
-        var addIncomeHandler = new AddIncomeHandler(addTransactionHandler);
-        var addExpenseHandler = new AddExpenseHandler(transactionRepository, cardRepository, clock);
-        var setDailyLimitHandler = new SetDailyLimitHandler(limitRepository, cardRepository, clock);
-        var dailyReportService = new DailyReportService(cardRepository, transactionRepository, limitRepository);
-        var cushionService = new CushionService(cardRepository);
-        var reportPrinter = new ReportPrinter(systemConsole.Out, cardRepository, transactionRepository, limitRepository);
+        var addTransactionHandler = new AddTransactionHandler(transactionRepository, cardRepository, clock, validationHelper);
+        var addIncomeHandler      = new AddIncomeHandler(addTransactionHandler);
+        var addExpenseHandler     = new AddExpenseHandler(transactionRepository, cardRepository, clock, validationHelper);
+        var setDailyLimitHandler  = new SetDailyLimitHandler(limitRepository, cardRepository, clock);
+        var dailyReportService    = new DailyReportService(cardRepository, transactionRepository, limitRepository);
+        var cushionService        = new CushionService(cardRepository);
+        var cushionCardFinder     = new CushionCardFinder(cardRepository);
 
-        var consoleUI = new ConsoleUI(
-            parser,
+      
+        var parser         = new CommandParser();
+        var reportPrinter  = new ReportPrinter(systemConsole.Out, cardRepository, transactionRepository, limitRepository);
+        var inputPrompter  = new InputPrompter(systemConsole, cardRepository);
+        var consoleDisplay = new ConsoleDisplay(systemConsole, cardRepository, limitRepository, clock);
+
+        var cushionTransferWizard = new CushionTransferWizard(
+            inputPrompter,
+            cardRepository,
+            cushionCardFinder,
+            cushionService,
+            addTransactionHandler,
+            systemConsole);
+
+        var wizardCommandHandler = new WizardCommandHandler(
+            inputPrompter,
+            addCardHandler,
+            addTransactionHandler,
+            addIncomeHandler,
+            addExpenseHandler,
+            setDailyLimitHandler,
+            dailyReportService,
+            reportPrinter,
+            clock,
+            systemConsole,
+            cushionTransferWizard,
+            new WizardOptionCollector());
+
+        var commandExecutor = new CommandExecutor(
             addCardHandler,
             setDefaultCardHandler,
             addTransactionHandler,
@@ -43,19 +77,37 @@ public static class Program
             setDailyLimitHandler,
             dailyReportService,
             reportPrinter,
+            consoleDisplay,
+            clock);
+
+        var onboardingManager = new OnboardingManager(
+            inputPrompter,
             cardRepository,
-            limitRepository,
             onboardingStateRepository,
-            clock,
+            addTransactionHandler,
+            cushionService,
+            clock);
+
+        var dispatcher = new CommandDispatcher(
+            parser,
             systemConsole,
-            cushionService);
+            wizardCommandHandler,
+            commandExecutor,
+            consoleDisplay);
 
-        if (args.Length > 0)
-        {
-            return consoleUI.Execute(args);
-        }
+        var loopRunner = new InteractiveLoopRunner(
+            systemConsole,
+            onboardingManager,
+            dispatcher);
 
-        consoleUI.RunInteractiveLoop();
-        return 0;
+        var consoleUI = new ConsoleUI(
+            parser,
+            systemConsole,
+            commandExecutor,
+            loopRunner);
+
+        return args.Length > 0
+            ? consoleUI.Execute(args)
+            : (consoleUI.RunInteractiveLoop(), 0).Item2;
     }
 }

@@ -14,6 +14,7 @@ public sealed class AddTransactionHandler
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICardRepository _cardRepository;
     private readonly CardResolver _cardResolver;
+    private readonly CushionCardFinder _cushionCardFinder;
     private readonly IClock _clock;
 
     public AddTransactionHandler(
@@ -24,6 +25,7 @@ public sealed class AddTransactionHandler
         _transactionRepository = transactionRepository;
         _cardRepository = cardRepository;
         _cardResolver = new CardResolver(cardRepository);
+        _cushionCardFinder = new CushionCardFinder(cardRepository);
         _clock = clock;
     }
 
@@ -58,29 +60,14 @@ public sealed class AddTransactionHandler
         return _transactionRepository.Add(trx);
     }
 
-   
-
     public int ResolveCardId(int? cardId)
     {
         return _cardResolver.ResolveCardId(cardId, TransactionType.Income);
     }
 
-    public Card? FindCushionCardLoose()
+    public Card? FindCushionCard()
     {
-        var cards = _cardRepository.GetAll();
-        var byFlag = cards.FirstOrDefault(c => c.IsCushion);
-        if (byFlag != null)
-        {
-            return byFlag;
-        }
-
-        var exact = cards.FirstOrDefault(c => c.Name == "Financial cushion");
-        if (exact != null)
-        {
-            return exact;
-        }
-
-        return cards.FirstOrDefault(c => c.Name.Contains("cushion"));
+        return _cushionCardFinder.FindCushion();
     }
 
     public void AddTransferPair(int fromCardId, int cushionCardId, decimal amount, DateOnly? date)

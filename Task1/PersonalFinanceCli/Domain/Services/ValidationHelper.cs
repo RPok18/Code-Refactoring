@@ -1,20 +1,27 @@
-namespace PersonalFinanceCli.Application.Services;
+using PersonalFinanceCli.Application.Services;
 
-public static class ValidationHelper
+public class ValidationHelper 
 {
-    public static void ValidateAmount(decimal amount)
+    private readonly IEnumerable<IValidator> _validators;
+
+    public ValidationHelper(IEnumerable<IValidator> validators)
     {
-        if (amount <= 0)
+        _validators = validators;
+    }
+
+    public void ValidateAmount(decimal amount)
+    {
+        foreach (var validator in _validators)
         {
-            throw new InvalidOperationException("Amount must be > 0.");
+            validator.Validate(amount);
         }
     }
 
-    public static void ValidateCategory(string category)
+    public void ValidateCategory(string category)
     {
-        if (string.IsNullOrWhiteSpace(category))
+        foreach (var validator in _validators)
         {
-            throw new InvalidOperationException("Category cannot be empty.");
+            validator.Validate(category);
         }
     }
 }
