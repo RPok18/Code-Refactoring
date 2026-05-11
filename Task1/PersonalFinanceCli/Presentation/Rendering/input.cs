@@ -304,8 +304,7 @@ public sealed class InputPrompter
 
             if (amount <= 0m || amount > incomeAmount)
             {
-                var formatter = new UiMoneyFormatter();
-                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({formatter.FormatMoneyShort(incomeAmount)} max).");
+                _console.WriteLine($"Error: Transfer amount must be > 0 and <= income ({UiMoneyFormatter.FormatMoneyShort(incomeAmount)} max).");
                 continue;
             }
 

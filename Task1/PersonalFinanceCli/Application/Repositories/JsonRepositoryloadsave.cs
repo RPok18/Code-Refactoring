@@ -9,18 +9,23 @@ public abstract class JsonRepositoryloadsave
         _dataStore = dataStore;
     }
 
-    protected void WithData(Action<FileData> action)
+    protected void WithData(Action<DataFile> action)
     {
         var fileData = _dataStore.Load();
+
         action(fileData);
+
         _dataStore.Save(fileData);
     }
 
-    protected T WithData<T>(Func<FileData, T> action)
+    protected T WithData<T>(Func<DataFile, T> action)
     {
         var fileData = _dataStore.Load();
+
         var result = action(fileData);
+
         _dataStore.Save(fileData);
+
         return result;
     }
 }

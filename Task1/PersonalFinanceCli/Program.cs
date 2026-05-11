@@ -23,7 +23,7 @@ public static class Program
         var clock                     = new SystemClock();
 
      
-        var validationHelper = new ValidationHelper(new[]
+        var validationHelper = new ValidationHelper(new IValidator[]
         {
             new AmountValidator(),
             new CategoryValidator()
@@ -32,13 +32,14 @@ public static class Program
        
         var addCardHandler        = new AddCardHandler(cardRepository);
         var setDefaultCardHandler = new SetDefaultCardHandler(cardRepository);
-        var addTransactionHandler = new AddTransactionHandler(transactionRepository, cardRepository, clock, validationHelper);
+        var cardResolver = new CardResolver(cardRepository);
+        var cushionCardFinder = new CushionCardFinder(cardRepository);
+        var addTransactionHandler = new AddTransactionHandler(transactionRepository, cardRepository, cardResolver, cushionCardFinder, validationHelper, clock);
         var addIncomeHandler      = new AddIncomeHandler(addTransactionHandler);
-        var addExpenseHandler     = new AddExpenseHandler(transactionRepository, cardRepository, clock, validationHelper);
+        var addExpenseHandler     = new AddExpenseHandler(transactionRepository, cardResolver, validationHelper, clock);
         var setDailyLimitHandler  = new SetDailyLimitHandler(limitRepository, cardRepository, clock);
         var dailyReportService    = new DailyReportService(cardRepository, transactionRepository, limitRepository);
         var cushionService        = new CushionService(cardRepository);
-        var cushionCardFinder     = new CushionCardFinder(cardRepository);
 
       
         var parser         = new CommandParser();
@@ -106,8 +107,14 @@ public static class Program
             commandExecutor,
             loopRunner);
 
-        return args.Length > 0
-            ? consoleUI.Execute(args)
-            : (consoleUI.RunInteractiveLoop(), 0).Item2;
+        if (args.Length > 0)
+        {
+            return consoleUI.Execute(args);
+        }
+        else
+        {
+            consoleUI.RunInteractiveLoop();
+            return 0;
+        }
     }
 }

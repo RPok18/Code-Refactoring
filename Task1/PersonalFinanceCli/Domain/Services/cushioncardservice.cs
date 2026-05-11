@@ -3,7 +3,7 @@ using PersonalFinanceCli.Domain.Entities;
 
 namespace PersonalFinanceCli.Application.Services;
 
-public sealed class CushionCardFinder
+public sealed class CushionCardFinder : ICushionCardFinder
 {
     private readonly ICardRepository _cardRepository;
 

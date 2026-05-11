@@ -1,5 +1,5 @@
 using PersonalFinanceCli.Application.Repositories;
-using PersonalFinanceCli.Application.Services;  // Add this
+using PersonalFinanceCli.Application.Services;
 using PersonalFinanceCli.Domain.Entities;
 using PersonalFinanceCli.Domain.ValueObjects;
 using PersonalFinanceCli.Infrastructure.Time;
@@ -9,25 +9,28 @@ namespace PersonalFinanceCli.Application.CommandHandlers;
 public sealed class AddExpenseHandler
 {
     private readonly ITransactionRepository _transactionRepository;
-    private readonly CardResolver _cardResolver;  // Add this
+    private readonly ICardResolver _cardResolver;
+    private readonly ValidationHelper _validationHelper;
     private readonly IClock _clock;
 
     public AddExpenseHandler(
         ITransactionRepository transactionRepository,
-        ICardRepository cardRepository,  // Keep for CardResolver
+        ICardResolver cardResolver,
+        ValidationHelper validationHelper,
         IClock clock)
     {
         _transactionRepository = transactionRepository;
-        _cardResolver = new CardResolver(cardRepository);  // Or inject via DI
+        _cardResolver = cardResolver;
+        _validationHelper = validationHelper;
         _clock = clock;
     }
 
     public Transaction Handle(decimal amount, string category, int? cardId, DateOnly? date, string? note)
     {
-        ValidationHelper.ValidateAmount(amount);  // Replace inline check
-        ValidationHelper.ValidateCategory(category);  // Replace inline check
+        _validationHelper.ValidateAmount(amount);
+        _validationHelper.ValidateCategory(category);
 
-        var resolvedCardId = _cardResolver.ResolveCardId(cardId, TransactionType.Expense);  // Replace inline logic
+        var resolvedCardId = _cardResolver.ResolveCardId(cardId, TransactionType.Expense);
 
         var trx = new Transaction
         {

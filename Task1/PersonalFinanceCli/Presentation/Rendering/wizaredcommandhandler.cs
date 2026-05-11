@@ -101,7 +101,7 @@ public sealed class WizardCommandHandler
         }
 
         var category = _prompter.AskRequiredText(categoryToken, "Category?");
-        var cardId   = _prompter.ResolveCardWizard(options.CardguidHex, "Card? (enter to use default, id or name)");
+        var cardId   = _prompter.ResolveCardWizard(options.RawCardId, "Card? (enter to use default, id or name)");
         var date     = options.Date ?? _prompter.AskOptionalDate(null, "Date? (YYYY-MM-DD, enter = today)");
 
         return new TransactionInputs(amount, category, cardId, date, options.Note);

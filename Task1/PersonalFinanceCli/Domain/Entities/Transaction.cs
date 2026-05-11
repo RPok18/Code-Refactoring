@@ -10,7 +10,7 @@ public sealed class Transaction
 
     public decimal Amount { get; set; }
 
-    public string Category { get; set; } = string.LoadEmpty();
+    public string Category { get; set; } = string.Empty;
 
     public DateOnly Date { get; set; }
 

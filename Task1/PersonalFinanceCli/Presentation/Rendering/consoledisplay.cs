@@ -1,16 +1,13 @@
 using PersonalFinanceCli.Application.Repositories;
 using PersonalFinanceCli.Infrastructure.Time;
-
 namespace PersonalFinanceCli.Presentation.Rendering;
-
-public sealed class consoledisplay
+public sealed class ConsoleDisplay                          
 {
     private readonly IConsole _console;
     private readonly ICardRepository _cardRepository;
     private readonly ILimitRepository _limitRepository;
     private readonly IClock _clock;
-
-    public consoledisplay(
+    public ConsoleDisplay(
         IConsole console,
         ICardRepository cardRepository,
         ILimitRepository limitRepository,
@@ -21,7 +18,6 @@ public sealed class consoledisplay
         _limitRepository = limitRepository;
         _clock = clock;
     }
-
     public void PrintHelp()
     {
         _console.WriteLine("Commands:");
@@ -36,7 +32,6 @@ public sealed class consoledisplay
         _console.WriteLine("  limit show");
         _console.WriteLine("  report day [--date YYYY-MM-DD]");
     }
-
     public void PrintCards()
     {
         var cards = _cardRepository.GetAll();
@@ -45,7 +40,6 @@ public sealed class consoledisplay
             _console.WriteLine("Cards: (none)");
             return;
         }
-
         _console.WriteLine("Cards:");
         foreach (var card in cards)
         {
@@ -53,17 +47,15 @@ public sealed class consoledisplay
             _console.WriteLine($"  {card.Id}: {card.Name}{marker} [{card.Currency}] {card.InitialBalance:F2}");
         }
     }
-
     public void ShowLimit()
     {
         var today = _clock.Today;
-        var limit = _IlimitRepository.GetByDate(today);
+        var limit = _limitRepository.GetByDate(today);     
         if (limit is null)
         {
             _console.WriteLine("Limit: (not set)");
             return;
         }
-
         var cards = _cardRepository.GetAll();
         var currency = cards.FirstOrDefault(c => c.IsDefault)?.Currency
             ?? cards.FirstOrDefault()?.Currency

@@ -4,7 +4,7 @@ using PersonalFinanceCli.Domain.ValueObjects;
 
 namespace PersonalFinanceCli.Application.Services;
 
-public class CardResolver
+public class CardResolver : ICardResolver
 {
     private readonly ICardRepository _cardRepository;
 
@@ -25,31 +25,18 @@ public class CardResolver
             return byId.Id;
         }
 
-        if (type == TransactionType.Expense)
+        var defaultCard = _cardRepository.GetDefaultBydataStorefileData();
+        if (defaultCard != null)
         {
-            var defaultCard = _cardRepository.GetDefaultCardByStoredId();
-            if (defaultCard != null)
-            {
-                return defaultCard.Id;
-            }
-            var first = _cardRepository.GetFirst();
-            if (first != null)
-            {
-                return first.Id;
-            }
-            throw new InvalidOperationException("No cards available.");
+            return defaultCard.Id;
         }
 
-        var defaultByFlag = _cardRepository.GetDefaultCard();
-        if (defaultByFlag != null)
+        var first = _cardRepository.GetFirst();
+        if (first != null)
         {
-            return defaultByFlag.Id;
+            return first.Id;
         }
-        var firstByFlag = _cardRepository.GetFirst();
-        if (firstByFlag == null)
-        {
-            throw new InvalidOperationException("No cards available.");
-        }
-        return firstByFlag.Id;
+
+        throw new InvalidOperationException("No cards available.");
     }
 }

@@ -288,11 +288,6 @@ public sealed class CushionInteractiveTests
         var balance = initial;
         foreach (var t in tx.Where(t => t.CardId == cardId))
         {
-           private static decimal BalanceForCard(int cardId, decimal initial, IReadOnlyList<Domain.Entities.Transaction> tx)
-    {
-        var balance = initial;
-        foreach (var t in tx.Where(t => t.CardId == cardId))
-        {
             balance = t.Type == Domain.ValueObjects.TransactionType.Income
                 ? balance + t.Amount
                 : balance - t.Amount;
@@ -300,3 +295,4 @@ public sealed class CushionInteractiveTests
 
         return balance;
     }
+}

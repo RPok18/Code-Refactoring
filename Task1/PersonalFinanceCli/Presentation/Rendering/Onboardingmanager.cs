@@ -44,7 +44,7 @@ public sealed class OnboardingManager
 
         var hasSeen = _onboardingStateRepository.HasSeenOnboarding();
         var cushion = _cushionService.FindCushionByName()
-            ?? _addTransactionHandler.FindCushionCardLoose()
+            ?? _addTransactionHandler.FindCushionCard()
             ?? _cushionService.FindCushionByContains();
         if (cushion != null)
         {

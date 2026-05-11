@@ -13,19 +13,24 @@ public sealed class AddTransactionHandler
 
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICardRepository _cardRepository;
-    private readonly CardResolver _cardResolver;
-    private readonly CushionCardFinder _cushionCardFinder;
+    private readonly ICardResolver _cardResolver;
+    private readonly ICushionCardFinder _cushionCardFinder;
+    private readonly ValidationHelper _validationHelper;
     private readonly IClock _clock;
 
     public AddTransactionHandler(
         ITransactionRepository transactionRepository,
         ICardRepository cardRepository,
+        ICardResolver cardResolver,
+        ICushionCardFinder cushionCardFinder,
+        ValidationHelper validationHelper,
         IClock clock)
     {
         _transactionRepository = transactionRepository;
         _cardRepository = cardRepository;
-        _cardResolver = new CardResolver(cardRepository);
-        _cushionCardFinder = new CushionCardFinder(cardRepository);
+        _cardResolver = cardResolver;
+        _cushionCardFinder = cushionCardFinder;
+        _validationHelper = validationHelper;
         _clock = clock;
     }
 
@@ -37,8 +42,8 @@ public sealed class AddTransactionHandler
         DateOnly? date,
         string? note)
     {
-        ValidationHelper.ValidateAmount(amount);
-        ValidationHelper.ValidateCategory(category);
+        _validationHelper.ValidateAmount(amount);
+        _validationHelper.ValidateCategory(category);
 
         var resolvedCardId = _cardResolver.ResolveCardId(cardId, type);
         var card = _cardRepository.GetById(resolvedCardId);

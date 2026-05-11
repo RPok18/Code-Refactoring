@@ -3,11 +3,12 @@ using PersonalFinanceCli.Domain.Entities;
 
 namespace PersonalFinanceCli.Infrastructure.Persistence;
 
-public sealed class JsonTransactionRepository : ITransactionRepository
+public sealed class JsonTransactionRepository : JsonRepositoryloadsave, ITransactionRepository
 {
     private readonly JsonDataStore _dataStore;
 
     public JsonTransactionRepository(JsonDataStore dataStore)
+        : base(dataStore)
     {
         _dataStore = dataStore;
     }

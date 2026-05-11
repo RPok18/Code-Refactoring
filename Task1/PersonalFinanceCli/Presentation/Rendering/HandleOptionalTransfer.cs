@@ -1,3 +1,7 @@
+using PersonalFinanceCli.Application.CommandHandlers;
+using PersonalFinanceCli.Application.Repositories;
+using PersonalFinanceCli.Application.Services;
+namespace PersonalFinanceCli.Presentation.Rendering;      
 public sealed class CushionTransferWizard
 {
     private readonly InputPrompter _prompter;
@@ -6,7 +10,6 @@ public sealed class CushionTransferWizard
     private readonly CushionService _cushionService;
     private readonly AddTransactionHandler _addTransactionHandler;
     private readonly IConsole _console;
-
     public CushionTransferWizard(
         InputPrompter prompter,
         ICardRepository cardRepository,
@@ -22,15 +25,12 @@ public sealed class CushionTransferWizard
         _addTransactionHandler = addTransactionHandler;
         _console = console;
     }
-
     public void OfferTransfer(decimal incomeAmount, string category, int sourceCardId, DateOnly? date)
     {
         if (!_prompter.AskYesNoDefaultYes("Transfer part of income to 'Financial cushion'? (y/n)"))
             return;
-
         var sourceCard = _cardRepository.GetById(sourceCardId);
         if (sourceCard == null) return;
-
         var cushion = _cushionCardFinder.FindCushion();
         if (cushion == null)
         {
@@ -39,20 +39,17 @@ public sealed class CushionTransferWizard
             else
                 return;
         }
-
         if (sourceCard.Currency != cushion.Currency)
         {
             if (!_prompter.AskYesNoWithCancel("Currencies do not match. Transfer anyway? (y/n)", out _))
                 return;
         }
-
         var transferAmount = _prompter.AskTransferAmount(incomeAmount, category, _cushionService);
         if (!transferAmount.HasValue)
         {
             _console.WriteLine("Transfer cancelled.");
             return;
         }
-
         _addTransactionHandler.AddTransferPair(sourceCardId, cushion.Id, transferAmount.Value, date);
     }
 }

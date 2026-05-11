@@ -1,5 +1,5 @@
+using PersonalFinanceCli.Presentation.Parsing;           
 namespace PersonalFinanceCli.Presentation.Rendering;
-
 public sealed class CommandDispatcher
 {
     private readonly CommandParser _parser;
@@ -7,7 +7,6 @@ public sealed class CommandDispatcher
     private readonly WizardCommandHandler _wizardCommandHandler;
     private readonly CommandExecutor _commandExecutor;
     private readonly ConsoleDisplay _consoleDisplay;
-
     public CommandDispatcher(
         CommandParser parser,
         IConsole console,
@@ -21,7 +20,6 @@ public sealed class CommandDispatcher
         _commandExecutor = commandExecutor;
         _consoleDisplay = consoleDisplay;
     }
-
     public void Dispatch(string line)
     {
         if (line.Equals("help", StringComparison.OrdinalIgnoreCase))
@@ -29,10 +27,8 @@ public sealed class CommandDispatcher
             _consoleDisplay.PrintHelp();
             return;
         }
-
         if (_wizardCommandHandler.TryHandleWizard(line))
             return;
-
         try
         {
             var parsed = _parser.Parse(line);
