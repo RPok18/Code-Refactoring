@@ -36,16 +36,19 @@ internal sealed class TestAppContext : IDisposable
         var parser = new CommandParser();
         var addCardHandler = new AddCardHandler(CardRepository);
         var setDefaultCardHandler = new SetDefaultCardHandler(CardRepository);
-        var addTransactionHandler = new AddTransactionHandler(TransactionRepository, CardRepository, Clock);
+        var cardResolver = new CardResolver(CardRepository);
+        var cushionCardFinder = new CushionCardFinder(CardRepository);
+        var validationHelper = new ValidationHelper(new IValidator[] { new AmountValidator(), new CategoryValidator() });
+        var addTransactionHandler = new AddTransactionHandler(TransactionRepository, CardRepository, cardResolver, cushionCardFinder, validationHelper, Clock);
         var addIncomeHandler = new AddIncomeHandler(addTransactionHandler);
-        var addExpenseHandler = new AddExpenseHandler(TransactionRepository, CardRepository, Clock);
+        var addExpenseHandler = new AddExpenseHandler(TransactionRepository, cardResolver, validationHelper, Clock);
         var setDailyLimitHandler = new SetDailyLimitHandler(LimitRepository, CardRepository, Clock);
         var dailyReportService = new DailyReportService(CardRepository, TransactionRepository, LimitRepository);
         var cushionService = new CushionService(CardRepository);
         var reportPrinter = new ReportPrinter(Console.Out, CardRepository, TransactionRepository, LimitRepository);
 
-        _consoleUI = new ConsoleUI(
-            parser,
+        var consoleDisplay = new ConsoleDisplay(Console, CardRepository, LimitRepository, Clock);
+        var commandExecutor = new CommandExecutor(
             addCardHandler,
             setDefaultCardHandler,
             addTransactionHandler,
@@ -54,12 +57,58 @@ internal sealed class TestAppContext : IDisposable
             setDailyLimitHandler,
             dailyReportService,
             reportPrinter,
+            consoleDisplay,
+            Clock);
+
+        var inputPrompter = new InputPrompter(Console, CardRepository); // or create a fake one
+
+        var onboardingManager = new OnboardingManager(
+            inputPrompter,
             CardRepository,
-            LimitRepository,
             OnboardingStateRepository,
+            addTransactionHandler,
+            cushionService,
+            Clock);
+
+        var cushionTransferWizard = new CushionTransferWizard(
+            inputPrompter,
+            CardRepository,
+            cushionCardFinder,
+            cushionService,
+            addTransactionHandler,
+            Console);
+
+        var wizardCommandHandler = new WizardCommandHandler(
+            inputPrompter,
+            addCardHandler,
+            addTransactionHandler,
+            addIncomeHandler,
+            addExpenseHandler,
+            setDailyLimitHandler,
+            dailyReportService,
+            reportPrinter,
             Clock,
             Console,
-            cushionService);
+            cushionTransferWizard,
+            new WizardOptionCollector());
+
+        var dispatcher = new CommandDispatcher(
+            parser,
+            Console,
+            wizardCommandHandler,
+            commandExecutor,
+            consoleDisplay);
+
+        var loopRunner = new InteractiveLoopRunner(
+            Console,
+            onboardingManager,
+            dispatcher);
+
+        _consoleUI = new ConsoleUI(
+            parser,
+            Console,
+            commandExecutor,
+            loopRunner);
     }
 
     public JsonDataStore DataStore { get; }

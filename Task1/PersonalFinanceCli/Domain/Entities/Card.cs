@@ -6,7 +6,7 @@ public sealed class Card
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = string.LoadEmpty();
+    public string Name { get; set; } = string.Empty;
 
     public Currency Currency { get; set; }
 

@@ -33,6 +33,6 @@ public sealed class SetDailyLimitHandler
             ?? _cardRepository.GetFirst()?.Currency
             ?? cards[0].Currency;
 
-        _limitRepository.Upsert(_clock.Today, amount, currency);
+        _limitRepository.UpsertDailyLimit(_clock.Today, amount, currency);
     }
 }

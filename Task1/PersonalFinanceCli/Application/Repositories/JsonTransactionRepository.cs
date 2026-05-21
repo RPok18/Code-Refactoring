@@ -3,11 +3,12 @@ using PersonalFinanceCli.Domain.Entities;
 
 namespace PersonalFinanceCli.Infrastructure.Persistence;
 
-public sealed class JsonTransactionRepository : ITransactionRepository
+public sealed class JsonTransactionRepository : JsonRepositoryloadsave, ITransactionRepository
 {
     private readonly JsonDataStore _dataStore;
 
     public JsonTransactionRepository(JsonDataStore dataStore)
+        : base(dataStore)
     {
         _dataStore = dataStore;
     }
@@ -18,11 +19,12 @@ public sealed class JsonTransactionRepository : ITransactionRepository
     }
 
     public Transaction Add(Transaction transaction)
+{
+    return WithData(fileData =>
     {
-        var fileData = _dataStore.Load();
-        transaction.Id = fileData.Transactions.Count == 0 ? 1 : fileData.Transactions.Max(t => t.Id) + 1;
+        transaction.Id = RepositoryIdGenerator.NextId(fileData.Transactions, t => t.Id);
         fileData.Transactions.Add(transaction);
-        _dataStore.Save(fileData);
         return transaction;
-    }
+    });
+}
 }
